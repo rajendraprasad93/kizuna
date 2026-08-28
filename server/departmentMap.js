@@ -1,9 +1,10 @@
 export const DEPARTMENT_NAME_ALIASES = {
   "Drainage Department": "Drainage & Water",
-  "Roads Department": "Roads & Infrastructure",
+  "Roads Department": "Roads & Infrastructure", 
   "Sanitation Department": "Sanitation",
   "Emergency Response": "Emergency Services",
   "Electricity Department": "Emergency Services",
+  "General Department": "Roads & Infrastructure", // Default fallback for General Department
 };
 
 export function canonicalDepartmentName(routerName) {

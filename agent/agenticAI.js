@@ -1,5 +1,5 @@
 import { config as defaultConfig } from "./config.js";
-import { query } from "./db.js";
+import { query } from "../server/db.js";
 import { clamp01, unique } from "./utils.js";
 import {
   getTool,
@@ -155,8 +155,16 @@ export class AgenticAI {
     }
   }
   assessProblem(report, g, context) {
+    // Map category_id to category name
+    const CATEGORY_MAP = {
+      "9e074cac-6ebb-4a4d-a425-5183aff24b66": "flooding",
+      "ab626bfb-64a0-471b-b5e6-e0fac49c3366": "pothole", 
+      "f1ff7e18-1402-403c-80d8-905a272d5496": "garbage"
+    };
+    
+    const categoryName = report?.category_id ? CATEGORY_MAP[report.category_id] : null;
     const problemType =
-      g?.problem_type?.primary || report?.category || "unknown";
+      g?.problem_type?.primary || categoryName || report?.category || "unknown";
     let confidence = clamp01(
       g?.problem_type?.confidence ?? report?.ai_confidence,
       0.5,
@@ -217,7 +225,7 @@ export class AgenticAI {
       !r.relationshipDiscovery &&
       (a.complexity !== "simple" ||
         a.urgency === "high" ||
-        ["flooding", "road_damage"].includes(a.problemType))
+        ["flooding", "road_damage", "pothole"].includes(a.problemType))
     )
       add("relationshipDiscovery", "Gather contextual and causal evidence.", 9);
     if (
@@ -392,13 +400,22 @@ export class AgenticAI {
       timeline = "review";
       human = true;
       hr.push("Conflicting evidence detected.");
-    } else if (state.criticalFailure || state.forcedHumanReview) {
+    } else if (state.criticalFailure) {
       action = "human_review_required";
       timeline = "review";
       human = true;
-      hr.push(
-        "A critical specialist model failed or the system was forced to stop for review.",
-      );
+      hr.push("A critical specialist model failed during analysis.");
+    } else if (state.forcedHumanReview) {
+      action = "human_review_required";
+      timeline = "review";
+      human = true;
+      if (state.stopReason === "Maximum iterations reached") {
+        hr.push("Analysis reached maximum iterations without reaching high confidence.");
+      } else if (state.stopReason === "No useful remaining tool") {
+        hr.push("No additional specialist tools available to improve analysis.");
+      } else {
+        hr.push("Analysis was stopped for review.");
+      }
     } else if (!state.hasCoreDecision) {
       action = "human_review_required";
       timeline = "review";
@@ -424,13 +441,13 @@ export class AgenticAI {
       action = "human_review_required";
       timeline = "review";
       human = true;
-      hr.push("Decision confidence is below the autonomous threshold.");
+      hr.push(`AI confidence (${(state.decisionConfidence * 100).toFixed(1)}%) is below the autonomous threshold (${(this.config.thresholds.high * 100).toFixed(0)}%).`);
     }
 
     if (state.decisionConfidence < this.config.thresholds.low) {
       action = "human_review_required";
       human = true;
-      hr.push("Decision confidence is below the acceptable review threshold.");
+      hr.push(`AI confidence (${(state.decisionConfidence * 100).toFixed(1)}%) is below the acceptable review threshold (${(this.config.thresholds.low * 100).toFixed(0)}%).`);
     }
     if (!route?.name && a.urgency !== "immediate") {
       human = true;
