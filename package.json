@@ -10,9 +10,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test": "node --test server/tests/*.test.js",
+    "test:server": "node --test server/tests/*.test.js",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
-    "check-db": "node scripts/check-db.js",
-    "test:server": "node --test server/tests/*.test.js"
+    "check-db": "node scripts/check-db.js"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
