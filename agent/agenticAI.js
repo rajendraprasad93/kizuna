@@ -48,6 +48,13 @@ export class AgenticAI {
         ...report,
         category: assessment.problemType // Add mapped category name
       };
+      
+      // DEBUG LOGGING
+      console.log('=== DEBUG REPORT WITH CATEGORY ===');
+      console.log('Original report:', JSON.stringify(report, null, 2));
+      console.log('Assessment problemType:', assessment.problemType);
+      console.log('reportWithCategory:', JSON.stringify(reportWithCategory, null, 2));
+      
       const results = {},
         trace = [],
         errors = [],
@@ -77,8 +84,12 @@ export class AgenticAI {
         }
         const batch = this.chooseBatch(candidates, results);
         const executions = await Promise.all(
-          batch.map((candidate) =>
-            this.executeTool(candidate.name, {
+          batch.map((candidate) => {
+            // DEBUG LOGGING
+            console.log(`=== DEBUG EXECUTING TOOL ${candidate.name} ===`);
+            console.log('Tool will receive reportWithCategory.category:', reportWithCategory.category);
+            
+            return this.executeTool(candidate.name, {
               report: reportWithCategory, // Use report with category field
               geminiAnalysis,
               allReports,
@@ -87,8 +98,8 @@ export class AgenticAI {
               iteration,
               assessment,
               problemType: assessment.problemType,
-            }),
-          ),
+            });
+          })
         );
         for (const e of executions) {
           used.add(e.toolName);
