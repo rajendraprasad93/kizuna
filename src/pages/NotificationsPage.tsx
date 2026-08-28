@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Bell, Loader2, CheckCheck } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -10,31 +11,35 @@ import type { Notification } from '@/types';
 
 export function NotificationsPage() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function load() {
       if (!profile?.id) return;
-      const { data } = await supabase.from('notifications').select('*').eq('user_id', profile.id).order('created_at', { ascending: false });
-      setNotifications((data as Notification[]) || []);
-      setLoading(false);
+      try {
+        const data = await api.notifications.list();
+        setNotifications(data || []);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     }
     load();
   }, [profile?.id]);
 
   const markAllRead = async () => {
-    if (!profile?.id) return;
-    await supabase.from('notifications').update({ is_read: true, read_at: new Date().toISOString() }).eq('user_id', profile.id).eq('is_read', false);
-    setNotifications(notifications.map((n) => ({ ...n, is_read: true })));
+    try {
+      await api.notifications.markAllRead();
+      setNotifications(notifications.map((n) => ({ ...n, is_read: true })));
+    } catch (err) { console.error(err); }
   };
 
   return (
-    <DashboardShell title="Notifications" subtitle={`${notifications.filter((n) => !n.is_read).length} unread`}>
+    <DashboardShell title={t('notificationsTitle')} subtitle={`${notifications.filter((n) => !n.is_read).length} unread`}>
       <div className="max-w-2xl mx-auto space-y-4">
         {notifications.length > 0 && (
           <div className="flex justify-end">
-            <Button size="sm" variant="ghost" onClick={markAllRead}><CheckCheck className="h-4 w-4" /> Mark all read</Button>
+            <Button size="sm" variant="ghost" onClick={markAllRead}><CheckCheck className="h-4 w-4" /> {t('markAllRead')}</Button>
           </div>
         )}
         {loading ? (
@@ -42,7 +47,7 @@ export function NotificationsPage() {
         ) : notifications.length === 0 ? (
           <Card className="p-12 text-center">
             <Bell className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">No notifications yet.</p>
+            <p className="text-slate-500">{t('noNotifications')}</p>
           </Card>
         ) : (
           notifications.map((n) => (

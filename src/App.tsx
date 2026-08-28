@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import { LanguageProvider } from '@/context/LanguageContext';
 import { LandingPage } from '@/pages/LandingPage';
 import { LoginPage } from '@/pages/LoginPage';
 import { RegisterPage } from '@/pages/RegisterPage';
@@ -49,9 +50,10 @@ function RootRedirect() {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
           <Route path="/" element={<RootRedirect />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
@@ -79,8 +81,9 @@ export default function App() {
           <Route path="/admin/departments" element={<ProtectedRoute roles={['admin']}><AdminDepartmentsPage /></ProtectedRoute>} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Users as UsersIcon, Mail } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -11,16 +12,22 @@ export function AdminUsersPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const { t } = useLanguage();
 
   useEffect(() => {
     async function load() {
-      const [userRes, deptRes] = await Promise.all([
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('departments').select('*'),
-      ]);
-      setUsers((userRes.data as Profile[]) || []);
-      setDepartments((deptRes.data as Department[]) || []);
-      setLoading(false);
+      try {
+        const [usrs, depts] = await Promise.all([
+          api.admin.getUsers(),
+          api.departments.list(),
+        ]);
+        setUsers(usrs || []);
+        setDepartments(depts || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
@@ -28,10 +35,10 @@ export function AdminUsersPage() {
   const filtered = filter === 'all' ? users : users.filter((u) => u.role === filter);
 
   const roleColor = (role: string) => role === 'admin' ? 'purple' : role === 'department' ? 'emerald' : 'blue';
-  const roleLabel = (role: string) => role === 'admin' ? 'Admin' : role === 'department' ? 'Official' : 'Citizen';
+  const roleLabel = (role: string) => role === 'admin' ? t('administrator') : role === 'department' ? t('departmentOfficial') : t('citizen');
 
   return (
-    <DashboardShell title="User Management" subtitle={`${users.length} users`}>
+    <DashboardShell title={t('users')} subtitle={`${users.length} users`}>
       <div className="space-y-4">
         <div className="flex gap-2">
           {['all', 'citizen', 'department', 'admin'].map((r) => (
@@ -40,7 +47,7 @@ export function AdminUsersPage() {
               onClick={() => setFilter(r)}
               className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${filter === r ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-100'}`}
             >
-              {r === 'all' ? 'All' : roleLabel(r)}s
+              {r === 'all' ? t('allUsers') : roleLabel(r)}s
             </button>
           ))}
         </div>
@@ -50,7 +57,7 @@ export function AdminUsersPage() {
         ) : filtered.length === 0 ? (
           <Card className="p-12 text-center">
             <UsersIcon className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500">No users found.</p>
+            <p className="text-slate-500">{t('noUsersFound')}</p>
           </Card>
         ) : (
           <Card className="overflow-hidden">

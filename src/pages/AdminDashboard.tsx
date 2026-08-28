@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, FileText, Users, Building2, Brain, TrendingUp, CheckCircle2, Clock, Activity, BarChart3 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Loader2, FileText, Users, Building2, Brain, TrendingUp, CheckCircle2, Activity, BarChart3 } from 'lucide-react';
+import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -15,25 +16,33 @@ export function AdminDashboard() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [analyses, setAnalyses] = useState<AiAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     async function load() {
-      const [repRes, catRes, userRes, deptRes] = await Promise.all([
-        supabase.from('reports').select('*, category:problem_categories(*)').order('created_at', { ascending: false }).limit(100),
-        supabase.from('problem_categories').select('*'),
-        supabase.from('profiles').select('*').order('created_at', { ascending: false }),
-        supabase.from('departments').select('*'),
-      ]);
-      setReports((repRes.data as unknown as Report[]) || []);
-      setCategories((catRes.data as ProblemCategory[]) || []);
-      setUsers((userRes.data as Profile[]) || []);
-      setDepartments((deptRes.data as Department[]) || []);
+      try {
+        const [reps, cats, usrs, depts] = await Promise.all([
+          api.reports.list({ limit: 100 }),
+          api.categories.list(),
+          api.admin.getUsers(),
+          api.departments.list(),
+        ]);
+        setReports(reps || []);
+        setCategories(cats || []);
+        setUsers(usrs || []);
+        setDepartments(depts || []);
 
-      if ((repRes.data as unknown as Report[])?.length > 0) {
-        const { data: aiData } = await supabase.from('ai_analyses').select('*');
-        setAnalyses((aiData as unknown as AiAnalysis[]) || []);
+        // Extract AI analyses from reports
+        const aiList: AiAnalysis[] = [];
+        (reps || []).forEach((r) => {
+          if ((r as any).ai_analysis) aiList.push((r as any).ai_analysis as AiAnalysis);
+        });
+        setAnalyses(aiList);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     load();
   }, []);
@@ -73,18 +82,17 @@ export function AdminDashboard() {
   };
 
   if (loading) {
-    return <DashboardShell title="Admin Overview"><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div></DashboardShell>;
+    return <DashboardShell title={t('overview')}><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div></DashboardShell>;
   }
 
   return (
-    <DashboardShell title="Admin Overview" subtitle="System-wide analytics and metrics">
+    <DashboardShell title={t('overview')} subtitle="System-wide analytics and metrics">
       <div className="space-y-6">
-        {/* Top stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={FileText} label="Total Reports" value={stats.totalReports} color="blue" />
-          <StatCard icon={Users} label="Total Users" value={stats.totalUsers} color="emerald" />
-          <StatCard icon={CheckCircle2} label="Resolved" value={stats.resolved} color="emerald" />
-          <StatCard icon={Brain} label="AI Analyzed" value={stats.analyzed} color="purple" />
+          <StatCard icon={FileText} label={t('totalReports')} value={stats.totalReports} color="blue" />
+          <StatCard icon={Users} label={t('totalUsers')} value={stats.totalUsers} color="emerald" />
+          <StatCard icon={CheckCircle2} label={t('resolved')} value={stats.resolved} color="emerald" />
+          <StatCard icon={Brain} label={t('aiAnalyzed')} value={stats.analyzed} color="purple" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -95,7 +103,7 @@ export function AdminDashboard() {
               <Card className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <TrendingUp className="h-4 w-4 text-emerald-600" />
-                  <span className="text-sm font-semibold text-slate-900">Resolution Rate</span>
+                  <span className="text-sm font-semibold text-slate-900">{t('resolutionRate')}</span>
                 </div>
                 <div className="text-3xl font-bold text-slate-900">{resolutionRate}%</div>
                 <div className="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -106,7 +114,7 @@ export function AdminDashboard() {
               <Card className="p-5">
                 <div className="flex items-center gap-2 mb-3">
                   <Brain className="h-4 w-4 text-brand-600" />
-                  <span className="text-sm font-semibold text-slate-900">AI Avg Confidence</span>
+                  <span className="text-sm font-semibold text-slate-900">{t('avgConfidence')}</span>
                 </div>
                 <div className="text-3xl font-bold text-slate-900">{avgConfidence}%</div>
                 <div className="mt-2 h-2 bg-slate-100 rounded-full overflow-hidden">
@@ -119,7 +127,7 @@ export function AdminDashboard() {
             {/* By category */}
             <Card className="p-5">
               <h3 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <BarChart3 className="h-4 w-4 text-slate-400" /> Reports by Category
+                <BarChart3 className="h-4 w-4 text-slate-400" /> {t('reportsByCategory')}
               </h3>
               <div className="space-y-3">
                 {byCategory.map((cat) => {
@@ -160,8 +168,8 @@ export function AdminDashboard() {
             {/* Recent reports */}
             <Card className="p-5">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-slate-900">Recent Reports</h3>
-                <Link to="/admin/reports" className="text-xs text-brand-600 font-medium">View all</Link>
+                <h3 className="text-sm font-semibold text-slate-900">{t('recentReports')}</h3>
+                <Link to="/admin/reports" className="text-xs text-brand-600 font-medium">{t('viewAll')}</Link>
               </div>
               <div className="space-y-2">
                 {recentReports.map((r) => (

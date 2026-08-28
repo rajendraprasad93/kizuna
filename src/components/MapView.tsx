@@ -59,16 +59,6 @@ export function MapView({ reports, categories, onSelect, selectedId, height = '4
     return { x, y };
   };
 
-  const gridLines = useMemo(() => {
-    const lines: { x1: number; y1: number; x2: number; y2: number }[] = [];
-    for (let i = 1; i < 8; i++) {
-      const v = (i / 8) * 100;
-      lines.push({ x1: v, y1: 0, x2: v, y2: 100 });
-      lines.push({ x1: 0, y1: v, x2: 100, y2: v });
-    }
-    return lines;
-  }, []);
-
   return (
     <div className="relative w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200" style={{ height }}>
       <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">

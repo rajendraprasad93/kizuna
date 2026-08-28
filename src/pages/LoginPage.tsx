@@ -2,11 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Brain, Mail, Lock, ArrowRight } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 export function LoginPage() {
   const { signIn } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,11 +22,7 @@ export function LoginPage() {
     setLoading(true);
     const { error } = await signIn(email, password);
     setLoading(false);
-    if (error) {
-      setError(error);
-    } else {
-      navigate('/dashboard');
-    }
+    if (error) { setError(error); } else { navigate('/dashboard'); }
   };
 
   return (
@@ -39,8 +38,8 @@ export function LoginPage() {
             <span className="font-display font-bold text-xl">CivicEye</span>
           </Link>
           <div>
-            <h1 className="font-display text-4xl font-bold leading-tight text-balance">Welcome back to intelligent city management.</h1>
-            <p className="mt-4 text-brand-100 text-lg">Sign in to report problems, track AI analysis, and manage cases.</p>
+            <h1 className="font-display text-4xl font-bold leading-tight text-balance">{t('loginTitle')}</h1>
+            <p className="mt-4 text-brand-100 text-lg">{t('loginSubtitle')}</p>
           </div>
           <div className="text-sm text-brand-200">Agentic AI for Smarter Cities</div>
         </div>
@@ -48,49 +47,31 @@ export function LoginPage() {
 
       <div className="flex-1 flex items-center justify-center p-6 bg-slate-50">
         <div className="w-full max-w-md">
-          <div className="lg:hidden mb-8">
+          <div className="flex justify-between items-center lg:hidden mb-8">
             <Link to="/" className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center">
                 <Brain className="h-5 w-5 text-white" />
               </div>
               <span className="font-display font-bold text-lg text-slate-900">CivicEye</span>
             </Link>
+            <LanguageToggle />
           </div>
-          <h2 className="font-display text-2xl font-bold text-slate-900">Sign in to your account</h2>
-          <p className="mt-2 text-sm text-slate-500">Enter your credentials to continue</p>
+          <div className="hidden lg:flex justify-end mb-4"><LanguageToggle /></div>
+          <h2 className="font-display text-2xl font-bold text-slate-900">{t('loginTitle')}</h2>
+          <p className="mt-2 text-sm text-slate-500">{t('loginSubtitle')}</p>
 
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-            <Input
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              icon={<Mail className="h-4 w-4" />}
-            />
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter your password"
-              required
-              icon={<Lock className="h-4 w-4" />}
-            />
-            {error && (
-              <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-                {error}
-              </div>
-            )}
+            <Input label={t('emailLabel')} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" required icon={<Mail className="h-4 w-4" />} />
+            <Input label={t('passwordLabel')} type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required icon={<Lock className="h-4 w-4" />} />
+            {error && <div className="rounded-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">{error}</div>}
             <Button type="submit" fullWidth size="lg" loading={loading}>
-              Sign In <ArrowRight className="h-4 w-4" />
+              {t('loginButton')} <ArrowRight className="h-4 w-4" />
             </Button>
           </form>
 
           <p className="mt-6 text-center text-sm text-slate-500">
-            Don't have an account?{' '}
-            <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-700">Create one</Link>
+            {t('noAccount')}{' '}
+            <Link to="/register" className="font-semibold text-brand-600 hover:text-brand-700">{t('registerLink')}</Link>
           </p>
         </div>
       </div>

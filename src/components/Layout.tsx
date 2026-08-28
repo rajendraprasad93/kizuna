@@ -2,10 +2,13 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Brain, LogOut, Menu, X, Bell, LayoutDashboard, Shield, Users } from 'lucide-react';
 import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { Button } from '@/components/ui/Button';
+import { LanguageToggle } from '@/components/LanguageToggle';
 
 export function Navbar() {
   const { profile, signOut } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -24,9 +27,9 @@ export function Navbar() {
     : '/login';
 
   const navLinks = [
-    { label: 'How It Works', href: '/#how-it-works' },
-    { label: 'AI Intelligence', href: '/#ai-intelligence' },
-    { label: 'For Officials', href: '/#for-officials' },
+    { label: t('howItWorks'), href: '/#how-it-works' },
+    { label: t('aiIntelligence'), href: '/#ai-intelligence' },
+    { label: t('forOfficials'), href: '/#for-officials' },
   ];
 
   return (
@@ -53,6 +56,7 @@ export function Navbar() {
           </nav>
 
           <div className="hidden md:flex items-center gap-2">
+            <LanguageToggle />
             {profile ? (
               <>
                 <Link to="/notifications" className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors relative">
@@ -61,19 +65,19 @@ export function Navbar() {
                 <Link to={dashLink}>
                   <Button size="sm" variant="secondary">
                     <LayoutDashboard className="h-4 w-4" />
-                    Dashboard
+                    {t('dashboard')}
                   </Button>
                 </Link>
                 <Button size="sm" variant="ghost" onClick={handleSignOut}>
                   <LogOut className="h-4 w-4" />
-                  Sign Out
+                  {t('signOut')}
                 </Button>
               </>
             ) : (
               location.pathname !== '/login' && location.pathname !== '/register' && (
                 <>
-                  <Link to="/login"><Button size="sm" variant="ghost">Sign In</Button></Link>
-                  <Link to="/register"><Button size="sm">Get Started</Button></Link>
+                  <Link to="/login"><Button size="sm" variant="ghost">{t('signIn')}</Button></Link>
+                  <Link to="/register"><Button size="sm">{t('getStarted')}</Button></Link>
                 </>
               )
             )}
@@ -93,15 +97,16 @@ export function Navbar() {
             </a>
           ))}
           <div className="pt-2 border-t border-slate-100 flex flex-col gap-2">
+            <LanguageToggle />
             {profile ? (
               <>
-                <Link to={dashLink} onClick={() => setMobileOpen(false)}><Button size="sm" fullWidth variant="secondary">Dashboard</Button></Link>
-                <Button size="sm" fullWidth variant="ghost" onClick={handleSignOut}>Sign Out</Button>
+                <Link to={dashLink} onClick={() => setMobileOpen(false)}><Button size="sm" fullWidth variant="secondary">{t('dashboard')}</Button></Link>
+                <Button size="sm" fullWidth variant="ghost" onClick={handleSignOut}>{t('signOut')}</Button>
               </>
             ) : (
               <>
-                <Link to="/login" onClick={() => setMobileOpen(false)}><Button size="sm" fullWidth variant="ghost">Sign In</Button></Link>
-                <Link to="/register" onClick={() => setMobileOpen(false)}><Button size="sm" fullWidth>Get Started</Button></Link>
+                <Link to="/login" onClick={() => setMobileOpen(false)}><Button size="sm" fullWidth variant="ghost">{t('signIn')}</Button></Link>
+                <Link to="/register" onClick={() => setMobileOpen(false)}><Button size="sm" fullWidth>{t('getStarted')}</Button></Link>
               </>
             )}
           </div>

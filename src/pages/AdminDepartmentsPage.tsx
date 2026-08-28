@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Loader2, Building2, Mail, Phone, MapPin } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
@@ -10,22 +11,28 @@ export function AdminDepartmentsPage() {
   const [departments, setDepartments] = useState<Department[]>([]);
   const [reports, setReports] = useState<Report[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     async function load() {
-      const [deptRes, repRes] = await Promise.all([
-        supabase.from('departments').select('*').order('name'),
-        supabase.from('reports').select('*'),
-      ]);
-      setDepartments((deptRes.data as Department[]) || []);
-      setReports((repRes.data as unknown as Report[]) || []);
-      setLoading(false);
+      try {
+        const [depts, reps] = await Promise.all([
+          api.departments.list(),
+          api.reports.list(),
+        ]);
+        setDepartments(depts || []);
+        setReports(reps || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
 
   return (
-    <DashboardShell title="Departments" subtitle={`${departments.length} departments`}>
+    <DashboardShell title={t('departments')} subtitle={`${departments.length} departments`}>
       {loading ? (
         <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div>
       ) : (
@@ -48,21 +55,21 @@ export function AdminDepartmentsPage() {
                       <p className="text-xs text-slate-500">{dept.description}</p>
                     </div>
                   </div>
-                  <Badge color={dept.is_active ? 'green' : 'slate'}>{dept.is_active ? 'Active' : 'Inactive'}</Badge>
+                  <Badge color={dept.is_active ? 'green' : 'slate'}>{dept.is_active ? t('active') : t('inactive')}</Badge>
                 </div>
 
                 <div className="grid grid-cols-3 gap-3 mb-4">
                   <div className="bg-slate-50 rounded-lg p-2 text-center">
                     <div className="text-lg font-bold text-slate-900">{deptReports.length}</div>
-                    <div className="text-xs text-slate-500">Total</div>
+                    <div className="text-xs text-slate-500">{t('totalReports')}</div>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-2 text-center">
                     <div className="text-lg font-bold text-amber-700">{active}</div>
-                    <div className="text-xs text-amber-600">Active</div>
+                    <div className="text-xs text-amber-600">{t('active')}</div>
                   </div>
                   <div className="bg-emerald-50 rounded-lg p-2 text-center">
                     <div className="text-lg font-bold text-emerald-700">{rate}%</div>
-                    <div className="text-xs text-emerald-600">Resolved</div>
+                    <div className="text-xs text-emerald-600">{t('resolved')}</div>
                   </div>
                 </div>
 

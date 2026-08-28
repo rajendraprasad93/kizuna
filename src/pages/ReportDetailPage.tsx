@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, User, Camera, Brain, Loader2, MessageSquare, Wrench, DollarSign, Timer } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -17,6 +18,7 @@ export function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [report, setReport] = useState<Report | null>(null);
   const [analysis, setAnalysis] = useState<AiAnalysis | null>(null);
   const [actions, setActions] = useState<ActionTaken[]>([]);
@@ -35,49 +37,47 @@ export function ReportDetailPage() {
   useEffect(() => {
     if (!id) return;
     async function load() {
-      const [repRes, catRes, deptRes] = await Promise.all([
-        supabase.from('reports').select('*, category:problem_categories(*)').eq('id', id).maybeSingle(),
-        supabase.from('problem_categories').select('*').eq('is_active', true),
-        supabase.from('departments').select('*').eq('is_active', true),
-      ]);
+      try {
+        const [repData, cats, depts] = await Promise.all([
+          api.reports.get(id!),
+          api.categories.list(),
+          api.departments.list(),
+        ]);
 
-      if (!repRes.data) { setLoading(false); return; }
-      const rep = repRes.data as unknown as Report;
-      setReport(rep);
-      setCategories((catRes.data as ProblemCategory[]) || []);
-      setDepartments((deptRes.data as Department[]) || []);
+        if (!repData) { setLoading(false); return; }
+        setReport(repData);
+        setCategories(cats || []);
+        setDepartments(depts || []);
+        setActions(repData.actions_taken || []);
 
-      const [aiRes, actRes] = await Promise.all([
-        supabase.from('ai_analyses').select('*').eq('report_id', id).maybeSingle(),
-        supabase.from('actions_taken').select('*, profile:profiles(*)').eq('report_id', id).order('created_at', { ascending: false }),
-      ]);
+        // Extract AI analysis from report if embedded
+        if ((repData as any).ai_analysis) {
+          setAnalysis((repData as any).ai_analysis as AiAnalysis);
+        }
 
-      if (aiRes.data) setAnalysis(aiRes.data as unknown as AiAnalysis);
-      setActions((actRes.data as unknown as ActionTaken[]) || []);
-
-      if (rep.department_id) {
-        const dept = (deptRes.data as Department[])?.find((d) => d.id === rep.department_id);
-        setDepartment(dept || null);
+        if (repData.department_id) {
+          const dept = depts?.find((d) => d.id === repData.department_id);
+          setDepartment(dept || null);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      if (rep.user_id) {
-        const { data: prof } = await supabase.from('profiles').select('*').eq('id', rep.user_id).maybeSingle();
-        setReporter(prof as Profile | null);
-      }
-      setLoading(false);
     }
     load();
   }, [id]);
 
   if (loading) {
-    return <DashboardShell title="Report Details"><div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div></DashboardShell>;
+    return <DashboardShell title={t('reportDetails')}><div className="flex items-center justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div></DashboardShell>;
   }
 
   if (!report) {
     return (
-      <DashboardShell title="Report Not Found">
+      <DashboardShell title={t('reportNotFound')}>
         <Card className="p-8 text-center">
-          <p className="text-slate-500 mb-4">This report could not be found.</p>
-          <Link to={dashLink}><Button>Back to Dashboard</Button></Link>
+          <p className="text-slate-500 mb-4">{t('couldNotFind')}</p>
+          <Link to={dashLink}><Button>{t('backToDashboard')}</Button></Link>
         </Card>
       </DashboardShell>
     );
@@ -85,20 +85,20 @@ export function ReportDetailPage() {
 
   return (
     <DashboardShell
-      title={report.title || 'Report Details'}
-      subtitle={`Reported ${new Date(report.created_at).toLocaleString()}`}
+      title={report.title || t('reportDetails')}
+      subtitle={`${t('reported')} ${new Date(report.created_at).toLocaleString()}`}
       actions={
         canManage ? (
           <>
-            <Button size="sm" variant="outline" onClick={() => setShowStatusModal(true)}>Update Status</Button>
-            <Button size="sm" onClick={() => setShowActionModal(true)}><Wrench className="h-4 w-4" /> Record Action</Button>
+            <Button size="sm" variant="outline" onClick={() => setShowStatusModal(true)}>{t('updateStatus')}</Button>
+            <Button size="sm" onClick={() => setShowActionModal(true)}><Wrench className="h-4 w-4" /> {t('recordAction')}</Button>
           </>
         ) : undefined
       }
     >
       <div className="mb-4">
         <Link to={dashLink}>
-          <Button size="sm" variant="ghost"><ArrowLeft className="h-4 w-4" /> Back</Button>
+          <Button size="sm" variant="ghost"><ArrowLeft className="h-4 w-4" /> {t('back')}</Button>
         </Link>
       </div>
 
@@ -133,11 +133,11 @@ export function ReportDetailPage() {
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div className="flex items-center gap-2 text-slate-600">
                 <MapPin className="h-4 w-4 text-slate-400" />
-                {report.latitude.toFixed(6)}, {report.longitude.toFixed(6)}
+                {parseFloat(String(report.latitude)).toFixed(6)}, {parseFloat(String(report.longitude)).toFixed(6)}
               </div>
               <div className="flex items-center gap-2 text-slate-600">
                 <Clock className="h-4 w-4 text-slate-400" />
-                {new Date(report.submitted_at).toLocaleDateString()}
+                {new Date(report.submitted_at || report.created_at).toLocaleDateString()}
               </div>
               {reporter && (
                 <div className="flex items-center gap-2 text-slate-600">
@@ -215,7 +215,7 @@ export function ReportDetailPage() {
           <Card className="p-4">
             <h3 className="text-sm font-semibold text-slate-900 mb-3">Timeline</h3>
             <div className="space-y-3">
-              <TimelineItem label="Submitted" date={report.submitted_at} active />
+              <TimelineItem label="Submitted" date={report.submitted_at || report.created_at} active />
               {report.assigned_at && <TimelineItem label="Assigned" date={report.assigned_at} active />}
               {report.resolved_at && <TimelineItem label="Resolved" date={report.resolved_at} active />}
               {report.status === 'in_progress' && <TimelineItem label="In Progress" date={report.updated_at} active />}
@@ -243,11 +243,12 @@ export function ReportDetailPage() {
           departments={departments}
           onClose={() => setShowStatusModal(false)}
           onUpdate={async (status, deptId) => {
-            const updates: Record<string, unknown> = { status };
-            if (deptId) updates.department_id = deptId;
-            if (status === 'assigned' && deptId) updates.assigned_at = new Date().toISOString();
-            if (status === 'resolved') updates.resolved_at = new Date().toISOString();
-            await supabase.from('reports').update(updates).eq('id', report.id);
+            await api.reports.update(report.id, {
+              status,
+              ...(deptId ? { department_id: deptId } : {}),
+              ...(status === 'assigned' && deptId ? { assigned_at: new Date().toISOString() } : {}),
+              ...(status === 'resolved' ? { resolved_at: new Date().toISOString() } : {}),
+            } as Partial<Report>);
             setShowStatusModal(false);
             navigate(0);
           }}
@@ -259,22 +260,14 @@ export function ReportDetailPage() {
         <ActionModal
           onClose={() => setShowActionModal(false)}
           onSubmit={async (actionType, description, notes, cost, duration, images) => {
-            await supabase.from('actions_taken').insert({
+            await api.actions.create({
               report_id: report.id,
               action_type: actionType,
               description,
               notes,
-              cost: cost || null,
-              duration_minutes: duration || null,
+              cost: cost || undefined,
+              duration_minutes: duration || undefined,
               after_image_urls: images,
-              performed_by: profile?.id,
-            });
-            await supabase.from('notifications').insert({
-              user_id: report.user_id,
-              report_id: report.id,
-              type: 'action_recorded',
-              title: 'Action recorded on your report',
-              message: `Department recorded: ${actionType}`,
             });
             setShowActionModal(false);
             navigate(0);

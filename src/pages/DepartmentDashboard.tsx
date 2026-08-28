@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, FileText, Clock, CheckCircle2, AlertCircle, Brain, MapPin, Wrench, TrendingUp } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Loader2, FileText, Clock, CheckCircle2, AlertCircle, Brain, TrendingUp } from 'lucide-react';
+import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -11,6 +12,7 @@ import type { Report, ProblemCategory, Department, AiAnalysis } from '@/types';
 
 export function DepartmentDashboard() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [reports, setReports] = useState<Report[]>([]);
   const [categories, setCategories] = useState<ProblemCategory[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
@@ -19,23 +21,29 @@ export function DepartmentDashboard() {
 
   useEffect(() => {
     async function load() {
-      const [repRes, catRes, deptRes] = await Promise.all([
-        supabase.from('reports').select('*, category:problem_categories(*)').order('created_at', { ascending: false }).limit(50),
-        supabase.from('problem_categories').select('*').eq('is_active', true),
-        supabase.from('departments').select('*').eq('is_active', true),
-      ]);
-      const reps = (repRes.data as unknown as Report[]) || [];
-      setReports(reps);
-      setCategories((catRes.data as ProblemCategory[]) || []);
-      setDepartments((deptRes.data as Department[]) || []);
+      try {
+        const [reps, cats, depts] = await Promise.all([
+          api.reports.list({ limit: 50 }),
+          api.categories.list(),
+          api.departments.list(),
+        ]);
+        setReports(reps || []);
+        setCategories(cats || []);
+        setDepartments(depts || []);
 
-      if (reps.length > 0) {
-        const { data: aiData } = await supabase.from('ai_analyses').select('*').in('report_id', reps.map((r) => r.id));
+        // Build analyses map from report ai_analysis field if available
         const aiMap: Record<string, AiAnalysis> = {};
-        (aiData as unknown as AiAnalysis[] || []).forEach((a) => { aiMap[a.report_id] = a; });
+        (reps || []).forEach((r) => {
+          if ((r as any).ai_analysis) {
+            aiMap[r.id] = (r as any).ai_analysis as AiAnalysis;
+          }
+        });
         setAnalyses(aiMap);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     load();
   }, []);
@@ -54,25 +62,25 @@ export function DepartmentDashboard() {
   const topCases = sortedByPriority.slice(0, 6);
 
   return (
-    <DashboardShell title="Department Dashboard" subtitle={myDept ? myDept.name : 'All departments'}>
+    <DashboardShell title={t('dashboardTitle')} subtitle={myDept ? myDept.name : 'All departments'}>
       <div className="space-y-6">
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={FileText} label="Total Cases" value={stats.total} color="blue" />
-          <StatCard icon={Clock} label="Active" value={stats.active} color="amber" />
-          <StatCard icon={CheckCircle2} label="Resolved" value={stats.resolved} color="emerald" />
-          <StatCard icon={AlertCircle} label="High Priority" value={stats.highPriority} color="red" />
+          <StatCard icon={FileText} label={t('totalReports')} value={stats.total} color="blue" />
+          <StatCard icon={Clock} label={t('active')} value={stats.active} color="amber" />
+          <StatCard icon={CheckCircle2} label={t('resolved')} value={stats.resolved} color="emerald" />
+          <StatCard icon={AlertCircle} label={t('highPriority')} value={stats.highPriority} color="red" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900">Priority Cases</h3>
-              <Link to="/department/reports" className="text-sm text-brand-600 hover:text-brand-700 font-medium">View all</Link>
+              <h3 className="font-semibold text-slate-900">{t('topCases')}</h3>
+              <Link to="/department/reports" className="text-sm text-brand-600 hover:text-brand-700 font-medium">{t('viewAll')}</Link>
             </div>
             {loading ? (
               <div className="flex justify-center py-12"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div>
             ) : topCases.length === 0 ? (
-              <Card className="p-8 text-center text-sm text-slate-400">No cases assigned yet.</Card>
+              <Card className="p-8 text-center text-sm text-slate-400">{t('noCases')}</Card>
             ) : (
               <div className="space-y-3">
                 {topCases.map((report) => {

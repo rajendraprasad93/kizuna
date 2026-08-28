@@ -1,7 +1,9 @@
 import { type ReactNode, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Brain, LogOut, Menu, X, Bell, LayoutDashboard, Map, Plus, BarChart3, User as UserIcon, Users, Building2, ShieldCheck } from 'lucide-react';
+import { Brain, LogOut, Menu, Bell, LayoutDashboard, Map, Plus, BarChart3, User as UserIcon, Users, Building2, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage, type TranslationKey } from '@/context/LanguageContext';
+import { LanguageToggle } from '@/components/LanguageToggle';
 import type { UserRole } from '@/types';
 
 interface DashboardShellProps {
@@ -13,6 +15,7 @@ interface DashboardShellProps {
 
 export function DashboardShell({ children, title, subtitle, actions }: DashboardShellProps) {
   const { profile, signOut } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -24,11 +27,10 @@ export function DashboardShell({ children, title, subtitle, actions }: Dashboard
     navigate('/');
   };
 
-  const navItems = getNavItems(role);
+  const navItems = getNavItems(role, t);
 
-  const roleLabel = role === 'admin' ? 'Administrator' : role === 'department' ? 'Department Official' : 'Citizen';
+  const roleLabel = role === 'admin' ? t('administrator') : role === 'department' ? t('departmentOfficial') : t('citizen');
   const roleColor = role === 'admin' ? 'text-purple-600 bg-purple-50' : role === 'department' ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50';
-  const dashLink = role === 'admin' ? '/admin/dashboard' : role === 'department' ? '/department/dashboard' : '/dashboard';
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
@@ -71,7 +73,7 @@ export function DashboardShell({ children, title, subtitle, actions }: Dashboard
             </div>
           </div>
           <button onClick={handleSignOut} className="mt-2 w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
-            <LogOut className="h-4 w-4" /> Sign Out
+            <LogOut className="h-4 w-4" /> {t('signOut')}
           </button>
         </div>
       </aside>
@@ -93,6 +95,7 @@ export function DashboardShell({ children, title, subtitle, actions }: Dashboard
             </div>
             <div className="flex items-center gap-2">
               {actions}
+              <LanguageToggle />
               <Link to="/notifications" className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors relative">
                 <Bell className="h-5 w-5" />
               </Link>
@@ -108,27 +111,27 @@ export function DashboardShell({ children, title, subtitle, actions }: Dashboard
   );
 }
 
-function getNavItems(role: UserRole) {
+function getNavItems(role: UserRole, t: (key: TranslationKey) => string) {
   if (role === 'admin') {
     return [
-      { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-      { label: 'All Reports', href: '/admin/reports', icon: BarChart3 },
-      { label: 'Departments', href: '/admin/departments', icon: Building2 },
-      { label: 'Users', href: '/admin/users', icon: Users },
+      { label: t('overview'), href: '/admin/dashboard', icon: LayoutDashboard },
+      { label: t('allReports'), href: '/admin/reports', icon: BarChart3 },
+      { label: t('departments'), href: '/admin/departments', icon: Building2 },
+      { label: t('users'), href: '/admin/users', icon: Users },
     ];
   }
   if (role === 'department') {
     return [
-      { label: 'Dashboard', href: '/department/dashboard', icon: LayoutDashboard },
-      { label: 'Assigned Cases', href: '/department/reports', icon: ShieldCheck },
-      { label: 'Map View', href: '/department/map', icon: Map },
+      { label: t('dashboard'), href: '/department/dashboard', icon: LayoutDashboard },
+      { label: t('assignedCases'), href: '/department/reports', icon: ShieldCheck },
+      { label: t('mapView'), href: '/department/map', icon: Map },
     ];
   }
   return [
-    { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-    { label: 'New Report', href: '/report/new', icon: Plus },
-    { label: 'My Reports', href: '/dashboard/my-reports', icon: BarChart3 },
-    { label: 'Map View', href: '/dashboard/map', icon: Map },
-    { label: 'Profile', href: '/profile', icon: UserIcon },
+    { label: t('dashboard'), href: '/dashboard', icon: LayoutDashboard },
+    { label: t('newReport'), href: '/report/new', icon: Plus },
+    { label: t('myReports'), href: '/dashboard/my-reports', icon: BarChart3 },
+    { label: t('mapView'), href: '/dashboard/map', icon: Map },
+    { label: t('profile'), href: '/profile', icon: UserIcon },
   ];
 }

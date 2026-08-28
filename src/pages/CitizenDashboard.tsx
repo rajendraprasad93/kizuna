@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, MapPin } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
@@ -12,19 +13,26 @@ import type { Report, ProblemCategory } from '@/types';
 
 export function CitizenDashboard() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [reports, setReports] = useState<Report[]>([]);
   const [categories, setCategories] = useState<ProblemCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function loadData() {
-      const [repRes, catRes] = await Promise.all([
-        supabase.from('reports').select('*, category:problem_categories(*)').eq('user_id', profile?.id).order('created_at', { ascending: false }),
-        supabase.from('problem_categories').select('*').eq('is_active', true),
-      ]);
-      setReports((repRes.data as unknown as Report[]) || []);
-      setCategories((catRes.data as ProblemCategory[]) || []);
-      setLoading(false);
+      if (!profile?.id) return;
+      try {
+        const [reps, cats] = await Promise.all([
+          api.reports.list({ user_id: profile.id }),
+          api.categories.list(),
+        ]);
+        setReports(reps || []);
+        setCategories(cats || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
     if (profile?.id) loadData();
   }, [profile?.id]);
@@ -39,41 +47,38 @@ export function CitizenDashboard() {
   const recentReports = reports.slice(0, 5);
 
   return (
-    <DashboardShell title="Dashboard" subtitle="Your problem reports at a glance">
+    <DashboardShell title={t('dashboardTitle')} subtitle={t('dashboardSubtitle')}>
       <div className="space-y-6">
-        {/* Welcome */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h2 className="font-display text-2xl font-bold text-slate-900">Hello, {profile?.full_name?.split(' ')[0]}</h2>
-            <p className="text-sm text-slate-500 mt-1">Track your reports and see AI insights in real time.</p>
+            <h2 className="font-display text-2xl font-bold text-slate-900">{t('hello')}, {profile?.full_name?.split(' ')[0]}</h2>
+            <p className="text-sm text-slate-500 mt-1">{t('trackReports')}</p>
           </div>
           <Link to="/report/new">
-            <Button size="lg"><Plus className="h-5 w-5" /> Report a Problem</Button>
+            <Button size="lg"><Plus className="h-5 w-5" /> {t('reportAProblem')}</Button>
           </Link>
         </div>
 
-        {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatCard icon={FileText} label="Total Reports" value={stats.total} color="blue" />
-          <StatCard icon={Clock} label="Active" value={stats.active} color="amber" />
-          <StatCard icon={CheckCircle2} label="Resolved" value={stats.resolved} color="emerald" />
-          <StatCard icon={AlertCircle} label="Awaiting AI" value={stats.pending} color="slate" />
+          <StatCard icon={FileText} label={t('totalReports')} value={stats.total} color="blue" />
+          <StatCard icon={Clock} label={t('active')} value={stats.active} color="amber" />
+          <StatCard icon={CheckCircle2} label={t('resolved')} value={stats.resolved} color="emerald" />
+          <StatCard icon={AlertCircle} label={t('awaitingAI')} value={stats.pending} color="slate" />
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Recent reports */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold text-slate-900">Recent Reports</h3>
-              <Link to="/dashboard/my-reports" className="text-sm text-brand-600 hover:text-brand-700 font-medium">View all</Link>
+              <h3 className="font-semibold text-slate-900">{t('recentReports')}</h3>
+              <Link to="/dashboard/my-reports" className="text-sm text-brand-600 hover:text-brand-700 font-medium">{t('viewAll')}</Link>
             </div>
             {loading ? (
-              <Card className="p-8 text-center text-sm text-slate-400">Loading...</Card>
+              <Card className="p-8 text-center text-sm text-slate-400">{t('loading')}</Card>
             ) : recentReports.length === 0 ? (
               <Card className="p-8 text-center">
                 <FileText className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                <p className="text-slate-500 mb-4">You haven't reported any problems yet.</p>
-                <Link to="/report/new"><Button><Plus className="h-4 w-4" /> Create your first report</Button></Link>
+                <p className="text-slate-500 mb-4">{t('noReportsYet')}</p>
+                <Link to="/report/new"><Button><Plus className="h-4 w-4" /> {t('submitFirstReport')}</Button></Link>
               </Card>
             ) : (
               <div className="space-y-3">
@@ -90,10 +95,10 @@ export function CitizenDashboard() {
                               </Badge>
                             )}
                           </div>
-                          <h4 className="font-semibold text-slate-900 text-sm truncate">{report.title || 'Untitled report'}</h4>
-                          <p className="text-xs text-slate-500 mt-1 line-clamp-2">{report.description || 'No description'}</p>
+                          <h4 className="font-semibold text-slate-900 text-sm truncate">{report.title || t('untitledReport')}</h4>
+                          <p className="text-xs text-slate-500 mt-1 line-clamp-2">{report.description || t('noDescription')}</p>
                           <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
-                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {report.latitude.toFixed(4)}, {report.longitude.toFixed(4)}</span>
+                            <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {parseFloat(String(report.latitude)).toFixed(4)}, {parseFloat(String(report.longitude)).toFixed(4)}</span>
                             <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(report.created_at).toLocaleDateString()}</span>
                           </div>
                         </div>
@@ -108,9 +113,8 @@ export function CitizenDashboard() {
             )}
           </div>
 
-          {/* Map */}
           <div className="space-y-4">
-            <h3 className="font-semibold text-slate-900">Your Reports Map</h3>
+            <h3 className="font-semibold text-slate-900">{t('mapView')}</h3>
             <MapView reports={reports} categories={categories} height="300px" centerLat={reports[0]?.latitude || 13.0827} centerLng={reports[0]?.longitude || 80.2707} />
             <Card className="p-4">
               <div className="flex items-center gap-2 mb-2">

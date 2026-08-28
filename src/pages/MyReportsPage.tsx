@@ -1,18 +1,20 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, FileText, MapPin, Clock, Filter } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { Loader2, FileText, MapPin, Clock } from 'lucide-react';
+import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import { useLanguage } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Input';
 import { MapView } from '@/components/MapView';
-import type { Report, ProblemCategory, ReportStatus } from '@/types';
+import type { Report, ProblemCategory } from '@/types';
 
 export function MyReportsPage() {
   const { profile } = useAuth();
+  const { t } = useLanguage();
   const [reports, setReports] = useState<Report[]>([]);
   const [categories, setCategories] = useState<ProblemCategory[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,13 +23,13 @@ export function MyReportsPage() {
 
   useEffect(() => {
     async function load() {
-      const [repRes, catRes] = await Promise.all([
-        supabase.from('reports').select('*, category:problem_categories(*)').eq('user_id', profile?.id).order('created_at', { ascending: false }),
-        supabase.from('problem_categories').select('*'),
-      ]);
-      setReports((repRes.data as unknown as Report[]) || []);
-      setCategories((catRes.data as ProblemCategory[]) || []);
-      setLoading(false);
+      if (!profile?.id) return;
+      try {
+        const [reps, cats] = await Promise.all([api.reports.list({ user_id: profile.id }), api.categories.list()]);
+        setReports(reps || []);
+        setCategories(cats || []);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     }
     if (profile?.id) load();
   }, [profile?.id]);
@@ -35,24 +37,21 @@ export function MyReportsPage() {
   const filtered = statusFilter === 'all' ? reports : reports.filter((r) => r.status === statusFilter);
 
   return (
-    <DashboardShell title="My Reports" subtitle={`${reports.length} total reports`}>
+    <DashboardShell title={t('myReportsTitle')} subtitle={t('myReportsSubtitle')}>
       <div className="space-y-4">
         <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-40">
-              <option value="all">All Status</option>
-              <option value="submitted">Submitted</option>
-              <option value="analyzing">Analyzing</option>
-              <option value="analyzed">Analyzed</option>
-              <option value="assigned">Assigned</option>
-              <option value="in_progress">In Progress</option>
-              <option value="resolved">Resolved</option>
-              <option value="rejected">Rejected</option>
-            </Select>
-          </div>
+          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="w-40">
+            <option value="all">{t('filterAll')}</option>
+            <option value="submitted">{t('submitted')}</option>
+            <option value="analyzed">{t('analyzed')}</option>
+            <option value="assigned">{t('assigned')}</option>
+            <option value="in_progress">{t('in_progress')}</option>
+            <option value="resolved">{t('resolved')}</option>
+            <option value="rejected">{t('rejected')}</option>
+          </Select>
           <div className="flex items-center gap-2">
             <Button size="sm" variant={view === 'list' ? 'secondary' : 'ghost'} onClick={() => setView('list')}>List</Button>
-            <Button size="sm" variant={view === 'map' ? 'secondary' : 'ghost'} onClick={() => setView('map')}>Map</Button>
+            <Button size="sm" variant={view === 'map' ? 'secondary' : 'ghost'} onClick={() => setView('map')}>{t('mapView')}</Button>
           </div>
         </div>
 
@@ -63,8 +62,8 @@ export function MyReportsPage() {
         ) : filtered.length === 0 ? (
           <Card className="p-12 text-center">
             <FileText className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-slate-500 mb-4">No reports found.</p>
-            <Link to="/report/new"><Button>Report a Problem</Button></Link>
+            <p className="text-slate-500 mb-4">{t('noReportsFound')}</p>
+            <Link to="/report/new"><Button>{t('reportAProblem')}</Button></Link>
           </Card>
         ) : (
           <div className="grid gap-3">
@@ -78,10 +77,10 @@ export function MyReportsPage() {
                         {report.category && <Badge color={report.category.color as 'blue' | 'amber' | 'green'}>{report.category.display_name.split(' / ')[0]}</Badge>}
                         <Badge color="slate">P{report.priority}</Badge>
                       </div>
-                      <h4 className="font-semibold text-slate-900 text-sm">{report.title || 'Untitled'}</h4>
-                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{report.description || 'No description'}</p>
+                      <h4 className="font-semibold text-slate-900 text-sm">{report.title || t('untitledReport')}</h4>
+                      <p className="text-xs text-slate-500 mt-1 line-clamp-2">{report.description || t('noDescription')}</p>
                       <div className="flex items-center gap-3 mt-2 text-xs text-slate-400">
-                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {report.latitude.toFixed(4)}, {report.longitude.toFixed(4)}</span>
+                        <span className="flex items-center gap-1"><MapPin className="h-3 w-3" /> {parseFloat(String(report.latitude)).toFixed(4)}, {parseFloat(String(report.longitude)).toFixed(4)}</span>
                         <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {new Date(report.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>

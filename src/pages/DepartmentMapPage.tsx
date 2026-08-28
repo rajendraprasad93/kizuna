@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { supabase } from '@/lib/supabase';
+import { api } from '@/lib/api';
 import { DashboardShell } from '@/components/DashboardShell';
 import { MapView } from '@/components/MapView';
 import { useNavigate } from 'react-router-dom';
@@ -11,17 +11,21 @@ export function DepartmentMapPage() {
   const [reports, setReports] = useState<Report[]>([]);
   const [categories, setCategories] = useState<ProblemCategory[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
-      const [repRes, catRes] = await Promise.all([
-        supabase.from('reports').select('*, category:problem_categories(*)').order('created_at', { ascending: false }),
-        supabase.from('problem_categories').select('*'),
-      ]);
-      setReports((repRes.data as unknown as Report[]) || []);
-      setCategories((catRes.data as ProblemCategory[]) || []);
-      setLoading(false);
+      try {
+        const [reps, cats] = await Promise.all([
+          api.reports.list(),
+          api.categories.list(),
+        ]);
+        setReports(reps || []);
+        setCategories(cats || []);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, []);
@@ -36,7 +40,6 @@ export function DepartmentMapPage() {
             reports={reports}
             categories={categories}
             height="600px"
-            selectedId={selected}
             onSelect={(r) => navigate(`/reports/${r.id}`)}
           />
         </div>
