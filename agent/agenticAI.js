@@ -42,6 +42,12 @@ export class AgenticAI {
     this.stats.totalRuns++;
     try {
       const assessment = this.assessProblem(report, geminiAnalysis, context);
+      
+      // Create a report copy with category field for compatibility with models
+      const reportWithCategory = {
+        ...report,
+        category: assessment.problemType // Add mapped category name
+      };
       const results = {},
         trace = [],
         errors = [],
@@ -73,12 +79,14 @@ export class AgenticAI {
         const executions = await Promise.all(
           batch.map((candidate) =>
             this.executeTool(candidate.name, {
-              report,
+              report: reportWithCategory, // Use report with category field
               geminiAnalysis,
               allReports,
               context,
               previousResults: results,
               iteration,
+              assessment,
+              problemType: assessment.problemType,
             }),
           ),
         );
