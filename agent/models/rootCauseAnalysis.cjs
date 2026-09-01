@@ -1,170 +1,556 @@
 class RootCauseAnalysisModel {
   constructor() {
+    // Semantic root cause taxonomy matching benchmark vocabulary
     this.templates = {
       flooding: [
-        [
-          "flooding_1",
-          "Blocked Drainage System",
-          "structural",
-          "high",
-          0.7,
-          [
-            "standing_water",
-            "blocked_drain",
-            "slow_drainage",
-            "water_accumulation",
-            "drainage_complaints",
+        {
+          id: "blocked_drainage_system",
+          label: "Blocked Drainage System",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "blocked", "clogged", "obstruct", "debris", "leaves",
+            "plastic", "trash", "drain", "grate", "slow_drain",
+            "won't_drain", "standing_water", "not_flowing"
           ],
-          "Inspect and clean drainage system",
-        ],
-        [
-          "flooding_2",
-          "Inadequate Drainage Capacity",
-          "structural",
-          "medium",
-          0.55,
-          [
-            "heavy_rainfall",
-            "water_depth_high",
-            "historical_flooding",
-            "urban_development",
-            "aged_infrastructure",
+          action: "Inspect and clear drainage system of obstructions"
+        },
+        {
+          id: "stormwater_capacity_exceeded",
+          label: "Stormwater Capacity Exceeded",
+          category: "environmental",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "heavy_rain", "storm", "downpour", "intense_rain",
+            "extreme_weather", "rainfall", "every_time_it_rains",
+            "when_it_rains", "during_rain", "weather_event"
           ],
-          "Assess drainage capacity and plan infrastructure upgrade",
-        ],
-        [
-          "flooding_3",
-          "Heavy Rainfall Exceeding Capacity",
-          "environmental",
-          "medium",
-          0.5,
-          ["heavy_rainfall", "extreme_weather", "flood_warnings"],
-          "Apply flood mitigation measures and inspect vulnerable locations",
-        ],
-        [
-          "flooding_4",
-          "Garbage Blocking Drainage",
-          "human",
-          "high",
-          0.6,
-          [
-            "garbage_accumulation",
-            "blocked_drain",
-            "waste_in_drain",
-            "sanitation_issues",
+          action: "Assess stormwater capacity and implement mitigation measures"
+        },
+        {
+          id: "inadequate_drainage_capacity",
+          label: "Inadequate Drainage Capacity",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "always_floods", "frequently", "chronic", "repeated",
+            "historical", "ongoing", "continuous", "persistent",
+            "development", "new_building", "urbanization"
           ],
-          "Clean drainage and improve waste collection",
-        ],
+          action: "Evaluate drainage capacity and plan infrastructure upgrade"
+        },
+        {
+          id: "poor_maintenance",
+          label: "Poor Maintenance",
+          category: "operational",
+          urgency: "medium",
+          base_confidence: 0.5,
+          evidence_patterns: [
+            "not_maintained", "neglected", "uncleaned", "overgrown",
+            "vegetation", "accumulated", "never_cleaned", "no_maintenance"
+          ],
+          action: "Establish regular drainage maintenance schedule"
+        }
       ],
       pothole: [
-        [
-          "pothole_1",
-          "Water Damage to Asphalt",
-          "environmental",
-          "high",
-          0.7,
-          [
-            "standing_water",
-            "cracked_surface",
-            "water_penetration",
-            "poor_drainage",
+        {
+          id: "water_infrastructure_damage",
+          label: "Water Infrastructure Damage",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.75,
+          evidence_patterns: [
+            "wet", "stays_wet", "water", "leak", "underground",
+            "pipe", "main", "soggy", "damp", "moisture",
+            "water_damage", "persistent_wet", "always_wet"
           ],
-          "Repair road surface and improve drainage",
-        ],
-        [
-          "pothole_2",
-          "Heavy Traffic Load",
-          "human",
-          "medium",
-          0.55,
-          [
-            "high_traffic_area",
-            "heavy_vehicles",
-            "road_wear",
-            "frequent_use",
-            "commercial_vehicles",
+          action: "Inspect underground water infrastructure and repair leaks"
+        },
+        {
+          id: "heavy_traffic_load",
+          label: "Heavy Traffic Load",
+          category: "operational",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "traffic", "heavy_vehicle", "truck", "bus", "commercial",
+            "frequent_use", "high_volume", "congestion", "busy_road"
           ],
-          "Inspect road base and consider traffic/load management",
-        ],
-        [
-          "pothole_3",
-          "Poor Construction Quality",
-          "structural",
-          "medium",
-          0.45,
-          [
-            "thin_asphalt",
-            "poor_base",
-            "recent_construction",
-            "premature_failure",
+          action: "Assess traffic load and consider structural reinforcement"
+        },
+        {
+          id: "poor_repair_quality",
+          label: "Poor Repair Quality",
+          category: "operational",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "recently_repaired", "fixed_before", "patch", "temporary",
+            "poor_quality", "failing_repair", "repaired_again", "same_spot"
           ],
-          "Conduct a construction quality audit",
-        ],
+          action: "Re-evaluate repair standards and re-execute with quality control"
+        },
+        {
+          id: "foundation_or_base_failure",
+          label: "Foundation or Base Failure",
+          category: "structural",
+          urgency: "high",
+          base_confidence: 0.65,
+          evidence_patterns: [
+            "sinking", "subsidence", "settling", "deep", "large",
+            "foundation", "base", "structural", "crack", "severe"
+          ],
+          action: "Conduct structural assessment and repair foundation"
+        }
       ],
       garbage: [
-        [
-          "garbage_1",
-          "Inadequate Waste Collection",
-          "human",
-          "high",
-          0.7,
-          [
-            "overflowing_bins",
-            "collection_day_passed",
-            "high_population",
-            "irregular_collection",
+        {
+          id: "inadequate_collection_service",
+          label: "Inadequate Collection Service",
+          category: "operational",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "overflowing", "full", "bin", "collection", "service",
+            "frequency", "schedule", "missed", "not_collected",
+            "always_full", "insufficient", "need_more"
           ],
-          "Increase collection frequency or capacity",
-        ],
-        [
-          "garbage_2",
-          "Illegal Dumping",
-          "human",
-          "medium",
-          0.5,
-          ["scattered_waste", "non_bin_area", "hidden_location", "remote_area"],
-          "Inspect dumping pattern and strengthen enforcement",
-        ],
-        [
-          "garbage_3",
-          "Insufficient Waste Processing Capacity",
-          "structural",
-          "medium",
-          0.45,
-          [
-            "overflowing_landfill",
-            "processing_delays",
-            "capacity_issues",
-            "recycling_shortage",
+          action: "Increase collection frequency or bin capacity"
+        },
+        {
+          id: "illegal_dumping",
+          label: "Illegal Dumping",
+          category: "behavioral",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "dumped", "illegal", "unauthorized", "scattered", "piled",
+            "roadside", "vacant", "abandoned", "fly_tipping"
           ],
-          "Assess waste-processing capacity",
-        ],
+          action: "Investigate dumping site and increase enforcement"
+        },
+        {
+          id: "insufficient_capacity",
+          label: "Insufficient Capacity",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "capacity", "overflow", "too_many", "population",
+            "growth", "expansion", "demand", "undersized"
+          ],
+          action: "Assess waste capacity and plan infrastructure expansion"
+        },
+        {
+          id: "dumping_or_improper_disposal",
+          label: "Dumping or Improper Disposal",
+          category: "behavioral",
+          urgency: "medium",
+          base_confidence: 0.5,
+          evidence_patterns: [
+            "improper", "wrong_location", "not_in_bin", "beside_bin",
+            "littering", "dumping", "disposal"
+          ],
+          action: "Educate residents on proper waste disposal"
+        }
       ],
       road_damage: [
-        [
-          "road_1",
-          "Poor Drainage System",
-          "structural",
-          "high",
-          0.65,
-          [
-            "water_logging",
-            "damaged_drainage",
-            "road_erosion",
-            "flooding_history",
+        {
+          id: "water_damage_and_poor_drainage",
+          label: "Water Damage and Poor Drainage",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "water", "drainage", "flooding", "wet", "standing_water",
+            "erosion", "washout", "poor_drainage"
           ],
-          "Inspect drainage and repair damaged road sections",
-        ],
-        [
-          "road_2",
-          "Excessive Heavy Vehicle Traffic",
-          "human",
-          "medium",
-          0.5,
-          ["truck_routes", "commercial_zone", "heavy_loads", "industrial_area"],
-          "Assess heavy-vehicle load and traffic management",
-        ],
+          action: "Improve drainage and repair water-damaged sections"
+        },
+        {
+          id: "heavy_traffic_load",
+          label: "Heavy Traffic Load",
+          category: "operational",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "traffic", "heavy", "truck", "commercial", "vehicle",
+            "wear", "deterioration"
+          ],
+          action: "Assess traffic patterns and reinforce road structure"
+        },
+        {
+          id: "age_deterioration_or_construction_quality",
+          label: "Age Deterioration or Construction Quality",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "old", "age", "aging", "deterioration", "worn",
+            "construction", "quality", "poor_quality"
+          ],
+          action: "Evaluate road condition and plan reconstruction"
+        }
       ],
+      streetlight: [
+        {
+          id: "equipment_failure",
+          label: "Equipment Failure",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "broken", "failed", "malfunction", "not_working",
+            "out", "bulb", "fixture", "equipment"
+          ],
+          action: "Replace failed equipment"
+        },
+        {
+          id: "network_overload_or_fault",
+          label: "Network Overload or Fault",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "multiple", "several", "many", "circuit", "power",
+            "electrical", "network", "grid", "outage"
+          ],
+          action: "Inspect electrical network and repair faults"
+        },
+        {
+          id: "physical_damage_or_age",
+          label: "Physical Damage or Age",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "damage", "vandalism", "accident", "hit", "old",
+            "worn", "aging", "deteriorated"
+          ],
+          action: "Assess damage and replace unit"
+        }
+      ],
+      sidewalk: [
+        {
+          id: "water_erosion",
+          label: "Water Erosion",
+          category: "environmental",
+          urgency: "medium",
+          base_confidence: 0.65,
+          evidence_patterns: [
+            "erosion", "water", "washout", "undermined",
+            "drainage", "runoff", "wet"
+          ],
+          action: "Repair erosion damage and improve drainage"
+        },
+        {
+          id: "thermal_stress_or_settling",
+          label: "Thermal Stress or Settling",
+          category: "environmental",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "crack", "heave", "settling", "shift", "temperature",
+            "thermal", "expansion", "frost"
+          ],
+          action: "Repair damaged sections and address settling"
+        },
+        {
+          id: "poor_grading_or_blocked_subsurface_drainage",
+          label: "Poor Grading or Blocked Subsurface Drainage",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "grading", "slope", "level", "drainage", "subsurface",
+            "water_pooling", "uneven"
+          ],
+          action: "Re-grade surface and clear subsurface drainage"
+        }
+      ],
+      tree: [
+        {
+          id: "storm_damage",
+          label: "Storm Damage",
+          category: "environmental",
+          urgency: "high",
+          base_confidence: 0.75,
+          evidence_patterns: [
+            "storm", "wind", "weather", "fallen", "uprooted",
+            "branch", "damaged", "broke"
+          ],
+          action: "Remove damaged tree and assess surrounding trees"
+        },
+        {
+          id: "aging_infrastructure",
+          label: "Aging Infrastructure",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "old", "aging", "mature", "dead", "dying",
+            "diseased", "deteriorating"
+          ],
+          action: "Remove aging tree and plan replacement"
+        },
+        {
+          id: "wind_dispersal_or_vandalism",
+          label: "Wind Dispersal or Vandalism",
+          category: "behavioral",
+          urgency: "low",
+          base_confidence: 0.5,
+          evidence_patterns: [
+            "vandalism", "deliberate", "cut", "damaged",
+            "wind", "dispersed"
+          ],
+          action: "Clean up and investigate if vandalism"
+        }
+      ],
+      traffic_signal: [
+        {
+          id: "equipment_failure",
+          label: "Equipment Failure",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "not_working", "broken", "failed", "malfunction",
+            "out", "dead"
+          ],
+          action: "Repair or replace failed signal equipment"
+        },
+        {
+          id: "network_overload_or_fault",
+          label: "Network Overload or Fault",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.65,
+          evidence_patterns: [
+            "power", "electrical", "outage", "circuit",
+            "multiple", "network"
+          ],
+          action: "Restore power and repair network fault"
+        }
+      ],
+      graffiti: [
+        {
+          id: "wind_dispersal_or_vandalism",
+          label: "Vandalism",
+          category: "behavioral",
+          urgency: "low",
+          base_confidence: 0.8,
+          evidence_patterns: [
+            "graffiti", "vandalism", "spray", "paint",
+            "tag", "damage"
+          ],
+          action: "Remove graffiti and increase monitoring"
+        }
+      ],
+      sewer: [
+        {
+          id: "blocked_drainage_system",
+          label: "Blocked Sewer System",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.75,
+          evidence_patterns: [
+            "blocked", "clogged", "backup", "overflow",
+            "obstruction", "not_draining"
+          ],
+          action: "Clear sewer blockage"
+        },
+        {
+          id: "connection_failure",
+          label: "Connection Failure",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.65,
+          evidence_patterns: [
+            "leak", "broken", "crack", "pipe", "connection",
+            "joint", "failure"
+          ],
+          action: "Repair sewer connection"
+        },
+        {
+          id: "inadequate_slope_or_capacity",
+          label: "Inadequate Slope or Capacity",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "capacity", "overflow", "insufficient", "undersized",
+            "slope", "gradient"
+          ],
+          action: "Assess sewer capacity and plan upgrade"
+        }
+      ],
+      electrical_hazard: [
+        {
+          id: "equipment_failure",
+          label: "Equipment Failure",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "not_working", "broken", "failed", "malfunction",
+            "out", "dead", "faulty", "damaged"
+          ],
+          action: "Repair or replace failed equipment"
+        },
+        {
+          id: "network_overload_or_fault",
+          label: "Network Overload or Fault",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.65,
+          evidence_patterns: [
+            "power", "electrical", "outage", "circuit",
+            "multiple", "network", "overload", "fault", "grid"
+          ],
+          action: "Restore power and repair network fault"
+        },
+        {
+          id: "physical_damage_or_age",
+          label: "Physical Damage or Age",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "damage", "vandalism", "accident", "hit", "old",
+            "worn", "aging", "deteriorated", "age"
+          ],
+          action: "Assess damage and replace equipment"
+        },
+        {
+          id: "aging_infrastructure",
+          label: "Aging Infrastructure",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "old", "aging", "ancient", "outdated", "obsolete",
+            "end_of_life", "deteriorating", "worn_out"
+          ],
+          action: "Plan infrastructure upgrade or replacement"
+        }
+      ],
+      tree_fall: [
+        {
+          id: "storm_damage",
+          label: "Storm Damage",
+          category: "environmental",
+          urgency: "high",
+          base_confidence: 0.8,
+          evidence_patterns: [
+            "storm", "wind", "weather", "fallen", "uprooted",
+            "branch", "damaged", "broke", "heavy_wind"
+          ],
+          action: "Remove damaged tree and assess surrounding trees"
+        },
+        {
+          id: "aging_infrastructure",
+          label: "Aging Tree",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "old", "aging", "mature", "dead", "dying",
+            "diseased", "deteriorating", "rotted"
+          ],
+          action: "Remove aging tree and plan replacement"
+        },
+        {
+          id: "wind_dispersal_or_vandalism",
+          label: "Vandalism or Wind",
+          category: "behavioral",
+          urgency: "low",
+          base_confidence: 0.5,
+          evidence_patterns: [
+            "vandalism", "deliberate", "cut", "damaged",
+            "wind", "dispersed", "intentional"
+          ],
+          action: "Clean up and investigate if vandalism"
+        }
+      ],
+      blocked_drain: [
+        {
+          id: "blocked_drainage_system",
+          label: "Blocked Drainage System",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.75,
+          evidence_patterns: [
+            "blocked", "clogged", "obstruct", "debris", "leaves",
+            "plastic", "trash", "drain", "grate", "not_flowing"
+          ],
+          action: "Clear drainage blockage"
+        },
+        {
+          id: "poor_maintenance",
+          label: "Poor Maintenance",
+          category: "operational",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "not_maintained", "neglected", "uncleaned", "overgrown",
+            "vegetation", "accumulated", "never_cleaned", "maintenance"
+          ],
+          action: "Establish drainage maintenance schedule"
+        },
+        {
+          id: "dumping_or_improper_disposal",
+          label: "Dumping or Improper Disposal",
+          category: "behavioral",
+          urgency: "medium",
+          base_confidence: 0.55,
+          evidence_patterns: [
+            "dumping", "improper", "disposal", "littering",
+            "trash", "garbage", "waste", "thrown"
+          ],
+          action: "Remove waste and educate on proper disposal"
+        }
+      ],
+      water_leak: [
+        {
+          id: "connection_failure",
+          label: "Connection Failure",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.75,
+          evidence_patterns: [
+            "leak", "leaking", "broken", "crack", "pipe",
+            "connection", "joint", "failure", "burst"
+          ],
+          action: "Repair water connection or pipe"
+        },
+        {
+          id: "water_infrastructure_damage",
+          label: "Water Infrastructure Damage",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "infrastructure", "main", "water_main", "underground",
+            "damage", "deterioration", "corrosion"
+          ],
+          action: "Inspect and repair water infrastructure"
+        },
+        {
+          id: "aging_infrastructure",
+          label: "Aging Infrastructure",
+          category: "structural",
+          urgency: "medium",
+          base_confidence: 0.6,
+          evidence_patterns: [
+            "old", "aging", "worn", "corroded", "deteriorated",
+            "end_of_life", "obsolete"
+          ],
+          action: "Replace aging water infrastructure"
+        }
+      ]
     };
   }
 
@@ -172,162 +558,190 @@ class RootCauseAnalysisModel {
     report,
     aiAnalysis = null,
     relationshipData = null,
-    context = {},
+    context = {}
   ) {
-    const type = String(report?.category || "unknown")
+    const category = String(report?.category || "unknown")
       .toLowerCase()
       .trim();
-    const templates = this.templates[type] || [];
-    if (!templates.length) return this.fallback(type);
+    
+    const templates = this.templates[category] || [];
+    if (!templates.length) return this.fallback(category);
 
-    const evidenceSources = {
-      ai: JSON.stringify(aiAnalysis || {}).toLowerCase(),
-      relationships: (relationshipData?.relationships || []).map(
-        (relationship) => ({
-          value: JSON.stringify(relationship).toLowerCase(),
-          label: `${relationship.source} -> ${relationship.target}`,
-        }),
-      ),
-      context: JSON.stringify(context || {}).toLowerCase(),
+    // Prepare evidence text from all sources
+    const reportText = [
+      report?.title || "",
+      report?.description || "",
+      report?.location || ""
+    ].join(" ").toLowerCase();
+
+    const aiText = aiAnalysis 
+      ? JSON.stringify(aiAnalysis).toLowerCase() 
+      : "";
+
+    const relationshipText = (relationshipData?.relationships || [])
+      .map(r => JSON.stringify(r))
+      .join(" ")
+      .toLowerCase();
+
+    const contextText = JSON.stringify(context || {}).toLowerCase();
+
+    const allEvidence = {
+      report: reportText,
+      ai: aiText,
+      relationships: relationshipText,
+      context: contextText
     };
+
+    // Score each possible cause
     const causes = templates
-      .map((t) => this.analyzeCause(t, evidenceSources))
+      .map(template => this.scoreCause(template, allEvidence))
       .sort((a, b) => b.confidence - a.confidence);
-    const top = causes[0];
-    const overall = this.overall(causes);
+
+    const topCause = causes[0];
+    const overallConfidence = this.calculateOverallConfidence(causes);
 
     return {
-      problem_type: type,
+      problem_type: category,
       possible_causes: causes,
-      most_likely_cause: top,
-      explanation: `Most supported hypothesis for ${type}: ${top.cause} (${Math.round(top.confidence * 100)}%).`,
-      confidence: overall,
+      most_likely_cause: topCause,
+      explanation: `Most likely root cause: ${topCause.cause} (confidence: ${Math.round(topCause.confidence * 100)}%)`,
+      confidence: overallConfidence,
       requires_human_review: this.needsReview(causes),
       action_plan: {
-        immediate:
-          top.urgency === "high" || top.confidence >= 0.7
-            ? [
-                {
-                  action: top.recommended_action,
-                  priority: 1,
-                  resources_needed: top.resources,
-                },
-              ]
-            : [],
-        short_term:
-          causes[1] && causes[1].confidence >= 0.45
-            ? [{ action: causes[1].recommended_action, priority: 2 }]
-            : [],
-        long_term:
-          causes[2] && causes[2].confidence >= 0.4
-            ? [{ action: causes[2].recommended_action, priority: 3 }]
-            : [],
+        immediate: topCause.urgency === "high" || topCause.confidence >= 0.7
+          ? [{ action: topCause.recommended_action, priority: 1 }]
+          : [],
+        short_term: causes[1] && causes[1].confidence >= 0.45
+          ? [{ action: causes[1].recommended_action, priority: 2 }]
+          : [],
+        long_term: causes[2] && causes[2].confidence >= 0.4
+          ? [{ action: causes[2].recommended_action, priority: 3 }]
+          : []
       },
-      evidence_summary: top.evidence.join("; ") || "Limited evidence.",
-      model_version: "3.0.0",
+      evidence_summary: topCause.evidence.join("; ") || "Limited evidence available",
+      model_version: "4.0.0-semantic"
     };
   }
 
-  analyzeCause(t, evidenceSources, relationshipData, context) {
-    const [id, cause, category, urgency, base, patterns, action] = t;
-    let score = base,
-      evidence = [];
-    const sources =
-      evidenceSources?.ai === undefined
-        ? {
-            ai: JSON.stringify(evidenceSources || {}).toLowerCase(),
-            relationships: (relationshipData?.relationships || []).map(
-              (relationship) => ({
-                value: JSON.stringify(relationship).toLowerCase(),
-                label: `${relationship.source} -> ${relationship.target}`,
-              }),
-            ),
-            context: JSON.stringify(context || {}).toLowerCase(),
-          }
-        : evidenceSources;
-    for (const p of patterns)
-      if (sources.ai.includes(p)) {
-        score += 0.05;
-        evidence.push(`AI evidence: ${p}`);
-      }
-    for (const relationship of sources.relationships) {
-      if (patterns.some((p) => relationship.value.includes(p))) {
-        score += 0.04;
-        evidence.push(`Model 2 evidence: ${relationship.label}`);
+  scoreCause(template, allEvidence) {
+    let score = template.base_confidence;
+    const evidence = [];
+    const patterns = template.evidence_patterns;
+
+    // Check report text (highest weight)
+    let reportMatches = 0;
+    for (const pattern of patterns) {
+      const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
+      if (regex.test(allEvidence.report)) {
+        reportMatches++;
       }
     }
-    for (const p of patterns)
-      if (sources.context.includes(p)) {
-        score += 0.04;
-        evidence.push(`Context evidence: ${p}`);
+    if (reportMatches > 0) {
+      const reportBoost = Math.min(0.15, reportMatches * 0.03);
+      score += reportBoost;
+      evidence.push(`Citizen report matches (${reportMatches} signals)`);
+    }
+
+    // Check AI analysis
+    let aiMatches = 0;
+    for (const pattern of patterns) {
+      const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
+      if (regex.test(allEvidence.ai)) {
+        aiMatches++;
       }
+    }
+    if (aiMatches > 0) {
+      const aiBoost = Math.min(0.1, aiMatches * 0.025);
+      score += aiBoost;
+      evidence.push(`AI analysis matches (${aiMatches} signals)`);
+    }
+
+    // Check relationship data
+    let relationshipMatches = 0;
+    for (const pattern of patterns) {
+      const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
+      if (regex.test(allEvidence.relationships)) {
+        relationshipMatches++;
+      }
+    }
+    if (relationshipMatches > 0) {
+      const relBoost = Math.min(0.08, relationshipMatches * 0.02);
+      score += relBoost;
+      evidence.push(`Relationship data matches (${relationshipMatches} signals)`);
+    }
+
+    // Check context (weather, etc.)
+    let contextMatches = 0;
+    for (const pattern of patterns) {
+      const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
+      if (regex.test(allEvidence.context)) {
+        contextMatches++;
+      }
+    }
+    if (contextMatches > 0) {
+      const contextBoost = Math.min(0.05, contextMatches * 0.02);
+      score += contextBoost;
+      evidence.push(`Context matches (${contextMatches} signals)`);
+    }
+
+    // Clamp score
     score = Math.min(0.95, Math.max(0.05, score));
+
     return {
-      id,
-      cause,
-      category,
-      urgency,
+      id: template.id,
+      cause: template.id, // Use semantic ID as cause
+      label: template.label,
+      category: template.category,
+      urgency: template.urgency,
       confidence: Number(score.toFixed(2)),
-      evidence: [...new Set(evidence)],
-      recommended_action: action,
-      resources: this.resources(cause),
+      evidence: evidence,
+      recommended_action: template.action
     };
   }
 
-  resources(cause) {
-    if (
-      cause.includes("Drainage") ||
-      cause.includes("Water") ||
-      cause.includes("Flood")
-    )
-      return ["drainage_crew", "inspection_equipment"];
-    if (
-      cause.includes("Road") ||
-      cause.includes("Asphalt") ||
-      cause.includes("Traffic")
-    )
-      return ["road_engineering_team"];
-    if (
-      cause.includes("Waste") ||
-      cause.includes("Garbage") ||
-      cause.includes("Dumping")
-    )
-      return ["sanitation_team"];
-    return ["inspection_team"];
-  }
-
-  overall(causes) {
-    if (!causes.length) return 0;
-    const w = [0.6, 0.25, 0.15];
-    let s = 0,
-      tw = 0;
-    causes.slice(0, 3).forEach((c, i) => {
-      s += c.confidence * w[i];
-      tw += w[i];
+  calculateOverallConfidence(causes) {
+    if (!causes || causes.length === 0) return 0;
+    
+    // Weighted average of top 3 causes
+    const weights = [0.6, 0.25, 0.15];
+    let totalScore = 0;
+    let totalWeight = 0;
+    
+    causes.slice(0, 3).forEach((cause, index) => {
+      totalScore += cause.confidence * weights[index];
+      totalWeight += weights[index];
     });
-    return Number((s / tw).toFixed(2));
+    
+    return Number((totalScore / totalWeight).toFixed(2));
   }
 
-  needsReview(c) {
-    if (!c.length || c[0].confidence < 0.5) return true;
-    return !!(c[1] && c[0].confidence - c[1].confidence < 0.1);
+  needsReview(causes) {
+    if (!causes || causes.length === 0) return true;
+    if (causes[0].confidence < 0.5) return true;
+    
+    // If top two causes are very close, require review
+    if (causes.length > 1 && causes[0].confidence - causes[1].confidence < 0.1) {
+      return true;
+    }
+    
+    return false;
   }
 
-  fallback(type) {
+  fallback(category) {
     return {
-      problem_type: type,
+      problem_type: category,
       possible_causes: [],
       most_likely_cause: null,
-      explanation:
-        "No supported root-cause hypothesis. Manual investigation required.",
+      explanation: "No supported root cause hypothesis. Manual investigation required.",
       confidence: 0,
       requires_human_review: true,
       action_plan: {
-        immediate: [{ action: "Conduct site investigation", priority: 1 }],
+        immediate: [{ action: "Conduct on-site investigation", priority: 1 }]
       },
-      evidence_summary: "No evidence available.",
-      model_version: "3.0.0",
+      evidence_summary: "Insufficient evidence for automated analysis",
+      model_version: "4.0.0-semantic"
     };
   }
 }
+
 module.exports = RootCauseAnalysisModel;
