@@ -12,9 +12,25 @@ class RootCauseAnalysisModel {
           evidence_patterns: [
             "blocked", "clogged", "obstruct", "debris", "leaves",
             "plastic", "trash", "drain", "grate", "slow_drain",
-            "won't_drain", "standing_water", "not_flowing"
+            "won't_drain", "not_flowing", "visible", "can_see",
+            "looking", "appears", "seems"
           ],
           action: "Inspect and clear drainage system of obstructions"
+        },
+        {
+          id: "inadequate_drainage_capacity",
+          label: "Inadequate Drainage Capacity",
+          category: "infrastructure",
+          urgency: "medium",
+          base_confidence: 0.65,
+          evidence_patterns: [
+            "always", "frequently", "chronic", "repeated", "repeating",
+            "historical", "ongoing", "continuous", "persistent",
+            "development", "new_building", "urbanization", "recurring",
+            "every_time", "consistently", "low_area", "low_lying",
+            "depression", "dip"
+          ],
+          action: "Evaluate drainage capacity and plan infrastructure upgrade"
         },
         {
           id: "stormwater_capacity_exceeded",
@@ -24,23 +40,10 @@ class RootCauseAnalysisModel {
           base_confidence: 0.6,
           evidence_patterns: [
             "heavy_rain", "storm", "downpour", "intense_rain",
-            "extreme_weather", "rainfall", "every_time_it_rains",
-            "when_it_rains", "during_rain", "weather_event"
+            "extreme_weather", "rainfall", "after_rain",
+            "when_it_rains", "during_rain", "weather_event", "raining"
           ],
           action: "Assess stormwater capacity and implement mitigation measures"
-        },
-        {
-          id: "inadequate_drainage_capacity",
-          label: "Inadequate Drainage Capacity",
-          category: "infrastructure",
-          urgency: "medium",
-          base_confidence: 0.55,
-          evidence_patterns: [
-            "always_floods", "frequently", "chronic", "repeated",
-            "historical", "ongoing", "continuous", "persistent",
-            "development", "new_building", "urbanization"
-          ],
-          action: "Evaluate drainage capacity and plan infrastructure upgrade"
         },
         {
           id: "poor_maintenance",
@@ -50,7 +53,8 @@ class RootCauseAnalysisModel {
           base_confidence: 0.5,
           evidence_patterns: [
             "not_maintained", "neglected", "uncleaned", "overgrown",
-            "vegetation", "accumulated", "never_cleaned", "no_maintenance"
+            "vegetation", "accumulated", "never_cleaned", "no_maintenance",
+            "maintenance"
           ],
           action: "Establish regular drainage maintenance schedule"
         }
@@ -65,7 +69,7 @@ class RootCauseAnalysisModel {
           evidence_patterns: [
             "wet", "stays_wet", "water", "leak", "underground",
             "pipe", "main", "soggy", "damp", "moisture",
-            "water_damage", "persistent_wet", "always_wet"
+            "water_damage", "persistent_wet", "always_wet", "waterlogged"
           ],
           action: "Inspect underground water infrastructure and repair leaks"
         },
@@ -74,10 +78,11 @@ class RootCauseAnalysisModel {
           label: "Heavy Traffic Load",
           category: "operational",
           urgency: "medium",
-          base_confidence: 0.6,
+          base_confidence: 0.7,
           evidence_patterns: [
             "traffic", "heavy_vehicle", "truck", "bus", "commercial",
-            "frequent_use", "high_volume", "congestion", "busy_road"
+            "frequent_use", "high_volume", "congestion", "busy_road",
+            "heavily_used", "heavy", "frequent", "used"
           ],
           action: "Assess traffic load and consider structural reinforcement"
         },
@@ -89,7 +94,8 @@ class RootCauseAnalysisModel {
           base_confidence: 0.55,
           evidence_patterns: [
             "recently_repaired", "fixed_before", "patch", "temporary",
-            "poor_quality", "failing_repair", "repaired_again", "same_spot"
+            "poor_quality", "failing_repair", "repaired_again", "same_spot",
+            "repair", "patched"
           ],
           action: "Re-evaluate repair standards and re-execute with quality control"
         },
@@ -101,7 +107,8 @@ class RootCauseAnalysisModel {
           base_confidence: 0.65,
           evidence_patterns: [
             "sinking", "subsidence", "settling", "deep", "large",
-            "foundation", "base", "structural", "crack", "severe"
+            "foundation", "base", "structural", "crack", "severe",
+            "collapsed", "sunken"
           ],
           action: "Conduct structural assessment and repair foundation"
         }
@@ -116,7 +123,7 @@ class RootCauseAnalysisModel {
           evidence_patterns: [
             "overflowing", "full", "bin", "collection", "service",
             "frequency", "schedule", "missed", "not_collected",
-            "always_full", "insufficient", "need_more"
+            "always_full", "insufficient", "need_more", "overflow"
           ],
           action: "Increase collection frequency or bin capacity"
         },
@@ -125,10 +132,11 @@ class RootCauseAnalysisModel {
           label: "Illegal Dumping",
           category: "behavioral",
           urgency: "medium",
-          base_confidence: 0.6,
+          base_confidence: 0.7,
           evidence_patterns: [
             "dumped", "illegal", "unauthorized", "scattered", "piled",
-            "roadside", "vacant", "abandoned", "fly_tipping"
+            "roadside", "vacant", "abandoned", "fly_tipping", "dumping",
+            "remote", "hidden", "isolated"
           ],
           action: "Investigate dumping site and increase enforcement"
         },
@@ -140,7 +148,7 @@ class RootCauseAnalysisModel {
           base_confidence: 0.55,
           evidence_patterns: [
             "capacity", "overflow", "too_many", "population",
-            "growth", "expansion", "demand", "undersized"
+            "growth", "expansion", "demand", "undersized", "insufficient"
           ],
           action: "Assess waste capacity and plan infrastructure expansion"
         },
@@ -152,7 +160,7 @@ class RootCauseAnalysisModel {
           base_confidence: 0.5,
           evidence_patterns: [
             "improper", "wrong_location", "not_in_bin", "beside_bin",
-            "littering", "dumping", "disposal"
+            "littering", "dumping", "disposal", "improper"
           ],
           action: "Educate residents on proper waste disposal"
         }
