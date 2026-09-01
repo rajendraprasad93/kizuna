@@ -41,7 +41,8 @@ class RootCauseAnalysisModel {
           evidence_patterns: [
             "heavy_rain", "storm", "downpour", "intense_rain",
             "extreme_weather", "rainfall", "after_rain",
-            "when_it_rains", "during_rain", "weather_event", "raining"
+            "when_it_rains", "during_rain", "weather_event", "raining",
+            "only_during", "only_when", "during_heavy"
           ],
           action: "Assess stormwater capacity and implement mitigation measures"
         },
@@ -91,11 +92,11 @@ class RootCauseAnalysisModel {
           label: "Poor Repair Quality",
           category: "operational",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.6,
           evidence_patterns: [
             "recently_repaired", "fixed_before", "patch", "temporary",
             "poor_quality", "failing_repair", "repaired_again", "same_spot",
-            "repair", "patched"
+            "repair", "patched", "recently", "just_fixed", "repaired_section"
           ],
           action: "Re-evaluate repair standards and re-execute with quality control"
         },
@@ -145,10 +146,11 @@ class RootCauseAnalysisModel {
           label: "Insufficient Capacity",
           category: "infrastructure",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.6,
           evidence_patterns: [
             "capacity", "overflow", "too_many", "population",
-            "growth", "expansion", "demand", "undersized", "insufficient"
+            "growth", "expansion", "demand", "undersized", "insufficient",
+            "despite", "regular", "accumulation"
           ],
           action: "Assess waste capacity and plan infrastructure expansion"
         },
@@ -179,6 +181,19 @@ class RootCauseAnalysisModel {
           action: "Improve drainage and repair water-damaged sections"
         },
         {
+          id: "foundation_or_base_failure",
+          label: "Foundation or Base Failure",
+          category: "structural",
+          urgency: "high",
+          base_confidence: 0.7,
+          evidence_patterns: [
+            "sinking", "subsidence", "settling", "deep", "large",
+            "foundation", "base", "structural", "crack", "severe",
+            "multiple_cracks", "subsidence"
+          ],
+          action: "Conduct structural assessment and repair foundation"
+        },
+        {
           id: "heavy_traffic_load",
           label: "Heavy Traffic Load",
           category: "operational",
@@ -195,10 +210,11 @@ class RootCauseAnalysisModel {
           label: "Age Deterioration or Construction Quality",
           category: "structural",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.65,
           evidence_patterns: [
             "old", "age", "aging", "deterioration", "worn",
-            "construction", "quality", "poor_quality"
+            "construction", "quality", "poor_quality", "no_obvious",
+            "no_visible", "unexplained"
           ],
           action: "Evaluate road condition and plan reconstruction"
         }
@@ -250,7 +266,7 @@ class RootCauseAnalysisModel {
           base_confidence: 0.65,
           evidence_patterns: [
             "erosion", "water", "washout", "undermined",
-            "drainage", "runoff", "wet"
+            "drainage", "runoff", "wet", "eroding", "edge"
           ],
           action: "Repair erosion damage and improve drainage"
         },
@@ -259,10 +275,10 @@ class RootCauseAnalysisModel {
           label: "Thermal Stress or Settling",
           category: "environmental",
           urgency: "medium",
-          base_confidence: 0.6,
+          base_confidence: 0.65,
           evidence_patterns: [
             "crack", "heave", "settling", "shift", "temperature",
-            "thermal", "expansion", "frost"
+            "thermal", "expansion", "frost", "single_crack", "pattern"
           ],
           action: "Repair damaged sections and address settling"
         },
@@ -271,10 +287,10 @@ class RootCauseAnalysisModel {
           label: "Poor Grading or Blocked Subsurface Drainage",
           category: "infrastructure",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.6,
           evidence_patterns: [
             "grading", "slope", "level", "drainage", "subsurface",
-            "water_pooling", "uneven"
+            "water_pooling", "uneven", "flat", "localized"
           ],
           action: "Re-grade surface and clear subsurface drainage"
         }
@@ -387,10 +403,10 @@ class RootCauseAnalysisModel {
           label: "Inadequate Slope or Capacity",
           category: "infrastructure",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.6,
           evidence_patterns: [
             "capacity", "overflow", "insufficient", "undersized",
-            "slope", "gradient"
+            "slope", "gradient", "accumulation", "no_visible", "no_blockage"
           ],
           action: "Assess sewer capacity and plan upgrade"
         }
@@ -404,7 +420,8 @@ class RootCauseAnalysisModel {
           base_confidence: 0.7,
           evidence_patterns: [
             "not_working", "broken", "failed", "malfunction",
-            "out", "dead", "faulty", "damaged"
+            "out", "dead", "faulty", "damaged", "isolated", "single",
+            "one", "specific"
           ],
           action: "Repair or replace failed equipment"
         },
@@ -413,10 +430,11 @@ class RootCauseAnalysisModel {
           label: "Network Overload or Fault",
           category: "infrastructure",
           urgency: "high",
-          base_confidence: 0.65,
+          base_confidence: 0.7,
           evidence_patterns: [
             "power", "electrical", "outage", "circuit",
-            "multiple", "network", "overload", "fault", "grid"
+            "multiple", "network", "overload", "fault", "grid",
+            "intermittent", "flickering", "area", "several"
           ],
           action: "Restore power and repair network fault"
         },
@@ -428,7 +446,7 @@ class RootCauseAnalysisModel {
           base_confidence: 0.6,
           evidence_patterns: [
             "damage", "vandalism", "accident", "hit", "old",
-            "worn", "aging", "deteriorated", "age"
+            "worn", "aging", "deteriorated", "age", "physical"
           ],
           action: "Assess damage and replace equipment"
         },
@@ -437,10 +455,11 @@ class RootCauseAnalysisModel {
           label: "Aging Infrastructure",
           category: "structural",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.65,
           evidence_patterns: [
             "old", "aging", "ancient", "outdated", "obsolete",
-            "end_of_life", "deteriorating", "worn_out"
+            "end_of_life", "deteriorating", "worn_out", "fraying",
+            "exposed", "corroded"
           ],
           action: "Plan infrastructure upgrade or replacement"
         }
@@ -475,10 +494,10 @@ class RootCauseAnalysisModel {
           label: "Vandalism or Wind",
           category: "behavioral",
           urgency: "low",
-          base_confidence: 0.5,
+          base_confidence: 0.6,
           evidence_patterns: [
             "vandalism", "deliberate", "cut", "damaged",
-            "wind", "dispersed", "intentional"
+            "wind", "dispersed", "intentional", "scattered", "clean_area"
           ],
           action: "Clean up and investigate if vandalism"
         }
@@ -492,7 +511,8 @@ class RootCauseAnalysisModel {
           base_confidence: 0.75,
           evidence_patterns: [
             "blocked", "clogged", "obstruct", "debris", "leaves",
-            "plastic", "trash", "drain", "grate", "not_flowing"
+            "plastic", "trash", "drain", "grate", "not_flowing",
+            "visible", "can_see"
           ],
           action: "Clear drainage blockage"
         },
@@ -501,10 +521,11 @@ class RootCauseAnalysisModel {
           label: "Poor Maintenance",
           category: "operational",
           urgency: "medium",
-          base_confidence: 0.6,
+          base_confidence: 0.7,
           evidence_patterns: [
             "not_maintained", "neglected", "uncleaned", "overgrown",
-            "vegetation", "accumulated", "never_cleaned", "maintenance"
+            "vegetation", "accumulated", "never_cleaned", "maintenance",
+            "not_maintained", "lack_of"
           ],
           action: "Establish drainage maintenance schedule"
         },
@@ -513,10 +534,11 @@ class RootCauseAnalysisModel {
           label: "Dumping or Improper Disposal",
           category: "behavioral",
           urgency: "medium",
-          base_confidence: 0.55,
+          base_confidence: 0.6,
           evidence_patterns: [
             "dumping", "improper", "disposal", "littering",
-            "trash", "garbage", "waste", "thrown"
+            "trash", "garbage", "waste", "thrown", "unusual",
+            "improper_disposal"
           ],
           action: "Remove waste and educate on proper disposal"
         }
@@ -638,14 +660,20 @@ class RootCauseAnalysisModel {
 
     // Check report text (highest weight)
     let reportMatches = 0;
+    let strongMatches = 0;
     for (const pattern of patterns) {
       const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
       if (regex.test(allEvidence.report)) {
         reportMatches++;
+        // Strong indicators worth more
+        if (pattern.length > 8 || pattern.includes('only_during') || pattern.includes('intermittent') || 
+            pattern.includes('recently_repaired') || pattern.includes('no_visible')) {
+          strongMatches++;
+        }
       }
     }
     if (reportMatches > 0) {
-      const reportBoost = Math.min(0.15, reportMatches * 0.03);
+      const reportBoost = Math.min(0.2, reportMatches * 0.04 + strongMatches * 0.03);
       score += reportBoost;
       evidence.push(`Citizen report matches (${reportMatches} signals)`);
     }
@@ -659,7 +687,7 @@ class RootCauseAnalysisModel {
       }
     }
     if (aiMatches > 0) {
-      const aiBoost = Math.min(0.1, aiMatches * 0.025);
+      const aiBoost = Math.min(0.12, aiMatches * 0.03);
       score += aiBoost;
       evidence.push(`AI analysis matches (${aiMatches} signals)`);
     }
@@ -673,7 +701,7 @@ class RootCauseAnalysisModel {
       }
     }
     if (relationshipMatches > 0) {
-      const relBoost = Math.min(0.08, relationshipMatches * 0.02);
+      const relBoost = Math.min(0.1, relationshipMatches * 0.025);
       score += relBoost;
       evidence.push(`Relationship data matches (${relationshipMatches} signals)`);
     }
@@ -687,7 +715,7 @@ class RootCauseAnalysisModel {
       }
     }
     if (contextMatches > 0) {
-      const contextBoost = Math.min(0.05, contextMatches * 0.02);
+      const contextBoost = Math.min(0.06, contextMatches * 0.025);
       score += contextBoost;
       evidence.push(`Context matches (${contextMatches} signals)`);
     }
