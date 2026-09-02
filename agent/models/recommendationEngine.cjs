@@ -208,6 +208,7 @@ class RecommendationEngine {
         "Blocked Drain",
         "waste clogged drain",
         "waste-clogged drain",
+        "blocked_drainage_system",
       ],
       flooding: [
         "Flooding",
@@ -230,12 +231,14 @@ class RecommendationEngine {
         "Excessive Heavy Vehicle Traffic",
         "Heavy Traffic Load",
         "Road Load",
+        "heavy_traffic_load",
       ],
       inadequate_waste_collection: [
         "Inadequate Waste Collection",
         "Waste Collection Failure",
         "Garbage Collection Failure",
         "Overflowing Waste",
+        "inadequate_collection_service",
       ],
       illegal_dumping: [
         "Illegal Dumping",
@@ -249,11 +252,15 @@ class RecommendationEngine {
         "Streetlight Failure",
         "Exposed Electrical Wiring",
         "Lighting Electrical Failure",
+        "equipment_failure",
+        "network_overload_or_fault",
       ],
       streetlight_structural_damage: [
         "Streetlight Structural Damage",
         "Damaged Streetlight Pole",
         "Leaning Streetlight Pole",
+        "physical_damage",
+        "physical_damage_or_age",
       ],
       water_supply_leak: [
         "Water Leak",
@@ -262,6 +269,8 @@ class RecommendationEngine {
         "Water Pipe Leak",
         "water_leak",
         "Pipe Failure",
+        "connection_failure",
+        "water_infrastructure_damage",
       ],
     };
 
