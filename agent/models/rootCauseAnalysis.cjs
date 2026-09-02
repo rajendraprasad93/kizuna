@@ -600,7 +600,8 @@ class RootCauseAnalysisModel {
       "streetlight_outage": "streetlight",
       "street_light": "streetlight",
       "drainage": "flooding",
-      "drain": "blocked_drain"
+      "drain": "blocked_drain",
+      "sanitation_issue": "sewer"
     };
     category = categoryAliases[category] || category;
     
