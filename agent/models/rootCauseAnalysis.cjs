@@ -646,6 +646,7 @@ class RootCauseAnalysisModel {
       report: reportText,
       ai: aiText,
       relationships: relationshipText,
+      relationshipData: relationshipData, // Pass full structure for confidence-aware scoring
       context: contextText
     };
 
@@ -896,18 +897,74 @@ class RootCauseAnalysisModel {
       evidence.push(`AI analysis matches (${aiMatches} signals)`);
     }
 
-    // Check relationship data
+    // Check relationship data (confidence-aware scoring)
     let relationshipMatches = 0;
-    for (const pattern of patterns) {
-      const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
-      if (regex.test(allEvidence.relationships)) {
-        relationshipMatches++;
+    let relationshipScore = 0;
+    
+    // If we have structured relationship data, use confidence-aware scoring
+    if (allEvidence.relationshipData?.relationships) {
+      for (const rel of allEvidence.relationshipData.relationships) {
+        // Check if this relationship's target matches any of our evidence patterns
+        const relTarget = (rel.target || '').toLowerCase().replace(/_/g, ' ');
+        const relSource = (rel.source || '').toLowerCase().replace(/_/g, ' ');
+        const relEvidence = (rel.evidence || []).join(' ').toLowerCase();
+        const relType = (rel.type || '').toLowerCase();
+        const relConfidence = rel.confidence || 0;
+        
+        let hasMatch = false;
+        for (const pattern of patterns) {
+          const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
+          if (regex.test(relTarget) || regex.test(relSource) || regex.test(relEvidence)) {
+            hasMatch = true;
+            break;
+          }
+        }
+        
+        if (hasMatch) {
+          relationshipMatches++;
+          
+          // Weight relationship contribution by confidence and type
+          // Hypothesis/weak relationships contribute much less than direct evidence
+          let weight = 0.025; // Base weight
+          
+          if (relType === 'hypothesis' || relType === 'association') {
+            // Hypothesis relationships: very low weight
+            weight = 0.008; // ~1/3 of normal
+          } else if (relType === 'historical' || relType === 'temporal') {
+            // Historical/temporal: moderate weight if high confidence
+            weight = 0.015 * Math.max(0.5, relConfidence);
+          } else if (relType === 'direct' || relType === 'causal') {
+            // Direct/causal: full weight if high confidence
+            weight = 0.025 * Math.max(0.7, relConfidence);
+          }
+          
+          // Apply confidence scaling: low confidence relationships contribute less
+          if (relConfidence < 0.6) {
+            weight *= 0.5; // Half weight for low-confidence relationships
+          }
+          
+          relationshipScore += weight;
+        }
       }
-    }
-    if (relationshipMatches > 0) {
-      const relBoost = Math.min(0.1, relationshipMatches * 0.025);
-      score += relBoost;
-      evidence.push(`Relationship data matches (${relationshipMatches} signals)`);
+      
+      if (relationshipMatches > 0) {
+        const relBoost = Math.min(0.1, relationshipScore);
+        score += relBoost;
+        evidence.push(`Relationship data matches (${relationshipMatches} signals)`);
+      }
+    } else {
+      // Fallback to simple text matching if no structured data
+      for (const pattern of patterns) {
+        const regex = new RegExp(pattern.replace(/_/g, "[\\s_-]"), "i");
+        if (regex.test(allEvidence.relationships)) {
+          relationshipMatches++;
+        }
+      }
+      if (relationshipMatches > 0) {
+        const relBoost = Math.min(0.1, relationshipMatches * 0.025);
+        score += relBoost;
+        evidence.push(`Relationship data matches (${relationshipMatches} signals)`);
+      }
     }
 
     // Check context (weather, etc.)
