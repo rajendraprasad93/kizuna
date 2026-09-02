@@ -71,7 +71,8 @@ class RootCauseAnalysisModel {
           evidence_patterns: [
             "wet", "stays_wet", "water", "leak", "underground",
             "pipe", "main", "soggy", "damp", "moisture",
-            "water_damage", "persistent_wet", "always_wet", "waterlogged"
+            "water_damage", "persistent_wet", "always_wet", "waterlogged",
+            "seeping", "seep", "spraying"
           ],
           action: "Inspect underground water infrastructure and repair leaks"
         },
@@ -93,11 +94,12 @@ class RootCauseAnalysisModel {
           label: "Poor Repair Quality",
           category: "operational",
           urgency: "medium",
-          base_confidence: 0.6,
+          base_confidence: 0.65,
           evidence_patterns: [
             "recently_repaired", "fixed_before", "patch", "temporary",
             "poor_quality", "failing_repair", "repaired_again", "same_spot",
-            "repair", "patched", "recently", "just_fixed", "repaired_section"
+            "repair", "patched", "recently", "just_fixed", "repaired_section",
+            "filled", "weeks_ago", "ago", "broken_again"
           ],
           action: "Re-evaluate repair standards and re-execute with quality control"
         },
