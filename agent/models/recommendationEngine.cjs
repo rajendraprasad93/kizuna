@@ -934,6 +934,43 @@ class RecommendationEngine {
       // Normalize category for template matching
       let problemType = this.normalizeText(report?.category || "unknown");
       
+      // Get description and RCA cause for context-aware classification
+      const description = (report?.description || "").toLowerCase();
+      const rcaCause = (rootCauseAnalysis?.most_likely_cause?.cause || "").toLowerCase();
+      
+      // Context-aware sanitation classification
+      if (problemType === "sanitation issue") {
+        // Priority 1: Check for explicit waste/garbage keywords (stronger signal)
+        if (description.includes('garbage') || description.includes('trash') ||
+            description.includes('waste') || description.includes('collection') ||
+            description.includes('bin') || description.includes('truck') ||
+            description.includes('pickup')) {
+          problemType = "garbage";
+        }
+        // Priority 2: Check for facility keywords (should NOT map to drainage)
+        else if (description.includes('toilet') || description.includes('restroom') ||
+                 description.includes('bathroom') || description.includes('facility') ||
+                 description.includes('lavatory')) {
+          // Keep as sanitation_issue - no specific template, will use generic
+          problemType = "sanitation issue";
+        }
+        // Priority 3: Check for sewage/drainage keywords
+        else if (description.includes('sewage') || description.includes('sewer') || 
+                 description.includes('wastewater') || description.includes('manhole') ||
+                 (description.includes('drain') && description.includes('back'))) {
+          problemType = "flooding";
+        }
+        // Priority 4: RCA cause as fallback only if description unclear
+        else if (rcaCause.includes('waste') || rcaCause.includes('garbage') || 
+                 rcaCause.includes('collection')) {
+          problemType = "garbage";
+        }
+        else if (rcaCause.includes('drainage') || rcaCause.includes('sewer')) {
+          problemType = "flooding";
+        }
+        // Otherwise keep as sanitation_issue (will fall through to generic)
+      }
+      
       // Category aliases for template matching
       const categoryMap = {
         "streetlight outage": "streetlight",
@@ -941,8 +978,6 @@ class RecommendationEngine {
         "power outage": "streetlight",
         "blocked drain": "flooding",  // Drain issues use flooding templates
         "drainage": "flooding",
-        "sanitation issue": "flooding",  // Sewage/sanitation use flooding/drainage templates
-        "sewer": "flooding",
         "tree fall": "road_damage",  // Tree falls use road damage (obstruction) templates
         "road damage": "road_damage"
       };
