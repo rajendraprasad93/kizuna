@@ -703,6 +703,11 @@ class RootCauseAnalysisModel {
         ? "poor_construction_quality"
         : "age_deterioration_or_construction_quality",
       
+      // Distinguish construction quality (new work) from repair quality (rework)
+      "poor_repair_quality": this.hasNewConstructionContext(reportText)
+        ? "poor_construction_quality"
+        : "poor_repair_quality",
+      
       "physical_damage_or_age": this.hasStrongPhysicalDamageEvidence(reportText, category)
         ? "physical_damage"
         : "physical_damage_or_age",
@@ -741,6 +746,12 @@ class RootCauseAnalysisModel {
     const hasRapidFailure = text.includes("month") || text.includes("few");
     const hasQualityContext = text.includes("poor") || text.includes("quality") || text.includes("appeared");
     return hasRecentWork && hasRapidFailure;
+  }
+  
+  hasNewConstructionContext(text) {
+    // New construction (repaving, resurfacing) vs repair (patching, filling)
+    // Use "repaved" as indicator of new construction work, not repair/patch
+    return text.includes("repav") && !text.includes("patch") && !text.includes("fill");
   }
   
   hasStrongPhysicalDamageEvidence(text, category) {
@@ -790,12 +801,21 @@ class RootCauseAnalysisModel {
       evidence.push("Penalized: storm physical damage context");
     }
     
+    // Equipment failure: penalize when storm caused physical infrastructure damage
+    if ((template.id === "equipment_failure") &&
+        text.includes("storm") && 
+        (text.includes("branch") || text.includes("tree")) &&
+        (text.includes("hanging") || text.includes("brought down"))) {
+      score -= 0.08; // Penalize equipment failure for storm physical damage
+      evidence.push("Penalized: storm caused physical infrastructure damage");
+    }
+    
     // Physical damage/age should be boosted for storm physical damage
     if ((template.id === "physical_damage_or_age") &&
         text.includes("storm") && 
         (text.includes("branch") || text.includes("tree")) &&
         (text.includes("hanging") || text.includes("brought down"))) {
-      score += 0.12; // Boost physical damage for storm events
+      score += 0.15; // Boost physical damage for storm events
       evidence.push("Boosted: storm physical damage evidence");
     }
     
