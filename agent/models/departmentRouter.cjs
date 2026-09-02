@@ -289,9 +289,39 @@ class DepartmentRouter {
     };
   }
   score(d, report, rca, recs, status, sev) {
-    let st = status[d.id] || { available: true, load: 0 },
-      type = d.types.includes(report.category) ? 1 : 0.2,
-      text = (
+    let st = status[d.id] || { available: true, load: 0 };
+    
+    // Enhanced scoring: Consider location context and RCA cause alignment
+    const location = (report.location || '').toLowerCase();
+    const reportText = ((report.title || '') + ' ' + (report.description || '')).toLowerCase();
+    const rcaCause = (rca?.most_likely_cause?.cause || '').toLowerCase();
+    
+    // Park jurisdiction detection (generalized)
+    const hasParkLocation = location.includes(' park') && !location.includes('park street') && 
+                            !location.includes('next to') && !location.includes('near');
+    const hasParkInText = (reportText.includes('in the park') || reportText.includes('in park') || 
+                          reportText.includes('at the park') || reportText.includes('at park') ||
+                          reportText.includes('central park')) && 
+                          !reportText.includes('next to the park') && !reportText.includes('near the park');
+    const isInPark = hasParkLocation || hasParkInText;
+    
+    // Dynamic type matching: Parks gets jurisdiction over general maintenance within their facilities
+    let parkJurisdictionTypes = ["tree_fall", "overgrown_vegetation", "park_damage", "playground_issue"];
+    if (isInPark && d.id === 'parks') {
+      // When issue is physically inside a park, Parks handles general maintenance types
+      parkJurisdictionTypes = parkJurisdictionTypes.concat([
+        "garbage",           // Waste management in parks
+        "streetlight_outage", // Park lighting
+        "blocked_drain",     // Park drainage
+        "vandalism",         // Park property damage
+        "equipment_damage"   // Park equipment
+      ]);
+    }
+    
+    const effectiveTypes = d.id === 'parks' ? parkJurisdictionTypes : d.types;
+    let type = effectiveTypes.includes(report.category) ? 1 : 0.2;
+    
+    let text = (
         (rca?.most_likely_cause?.cause || "") +
         " " +
         (rca?.most_likely_cause?.evidence || []).join(" ")
@@ -308,35 +338,20 @@ class DepartmentRouter {
         ? 0.9
         : 0.3;
     
-    // Enhanced scoring: Consider location context and RCA cause alignment
-    const location = (report.location || '').toLowerCase();
-    const reportText = ((report.title || '') + ' ' + (report.description || '')).toLowerCase();
-    const rcaCause = (rca?.most_likely_cause?.cause || '').toLowerCase();
-    
     let locationBoost = 0;
     let rcaCauseBoost = 0;
     
     // Location-based routing: Parks department for park locations
-    if (d.id === 'parks') {
-      // Check both location field and report text for park mentions
-      // But only if actually IN a park, not on a street named "Park" or near a park
-      const hasParkLocation = location.includes(' park') && !location.includes('park street') && 
-                              !location.includes('next to') && !location.includes('near');
-      const hasParkInText = (reportText.includes('in the park') || reportText.includes('in park') || 
-                            reportText.includes('at the park') || reportText.includes('at park') ||
-                            reportText.includes('central park')) && 
-                            !reportText.includes('next to the park') && !reportText.includes('near the park');
-      
-      if (hasParkLocation || hasParkInText) {
-        locationBoost = 0.8; // Extremely strong boost - parks have jurisdiction over their own facilities
-      }
+    if (d.id === 'parks' && isInPark) {
+      locationBoost = 0.4; // Strong boost for park jurisdiction
     }
     
     // RCA cause should strongly influence department selection
     // Waste management issues → Sanitation (even if category is blocked_drain)
+    // BUT: reduce this boost when issue is inside a park (park jurisdiction takes precedence)
     if (d.id === 'sanitation') {
       if (rcaCause.includes('waste') || rcaCause.includes('collection') || rcaCause.includes('garbage')) {
-        rcaCauseBoost = 0.35; // Strong boost for waste-related RCA causes (reduced from 0.4 to allow park jurisdiction)
+        rcaCauseBoost = isInPark ? 0.15 : 0.35; // Reduced boost when in park jurisdiction
       }
       // Sewage/sanitation issues should route to Sanitation
       if (reportText.includes('sewage') || reportText.includes('sewer') || report.category === 'sanitation_issue') {
