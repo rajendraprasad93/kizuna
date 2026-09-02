@@ -462,6 +462,82 @@ class RecommendationEngine {
             ),
           ],
         },
+        "flooding": {
+          // Stormwater capacity exceeded, slope issues
+          immediate: [
+            this.action(
+              "flood_manage_water",
+              "Manage Water Flow",
+              "Deploy temporary water management measures",
+              1,
+              "Drainage Department",
+              "4-12 hours",
+              "low",
+              ["pumping_equipment"],
+              ["Assess flooding", "Deploy pumps", "Monitor levels"],
+              "Water reaches safe level",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "flood_drain_repair",
+              "Address Drainage System Issues",
+              "Improve drainage system performance",
+              2,
+              "Drainage Department",
+              "3-7 days",
+              "medium",
+              ["drainage_crew"],
+              ["Inspect system", "Clear/repair", "Test flow"],
+              "System operates effectively",
+            ),
+          ],
+          long_term: [
+            this.action(
+              "flood_capacity_upgrade",
+              "Upgrade Drainage Capacity",
+              "Design and implement capacity improvements",
+              3,
+              "City Planning Department",
+              "6-12 months",
+              "very_high",
+              ["engineering_team", "contractors"],
+              ["Study capacity", "Design", "Approve", "Construct"],
+              "Flooding recurrence prevented",
+            ),
+          ],
+        },
+        "inadequate_waste_collection": {
+          // Waste management causing drain blockage  
+          immediate: [
+            this.action(
+              "flood_garbage_clean",
+              "Remove Waste From Drainage",
+              "Clear waste materials blocking drainage",
+              1,
+              "Sanitation Department",
+              "2-4 hours",
+              "low",
+              ["collection_equipment"],
+              ["Remove waste", "Clear drain", "Verify flow"],
+              "Drainage flows freely",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "flood_waste_prevention",
+              "Prevent Waste Accumulation",
+              "Implement waste management near drainage",
+              2,
+              "Sanitation Department",
+              "1-2 weeks",
+              "medium",
+              ["waste_bins", "signage"],
+              ["Install bins", "Post signs", "Schedule collection"],
+              "Waste managed before reaching drainage",
+            ),
+          ],
+        },
       },
       pothole: {
         "Water Damage to Asphalt": {
@@ -724,6 +800,37 @@ class RecommendationEngine {
               "medium",
               ["asphalt_paver", "compactor"],
               ["Cut damaged section", "Prepare base", "Lay asphalt", "Compact"],
+              "Road is restored and safe",
+            ),
+          ],
+        },
+        "heavy_vehicle_traffic": {
+          // Heavy traffic load causing road damage
+          immediate: [
+            this.action(
+              "road_temp_safety",
+              "Install Temporary Safety Measures",
+              "Reduce immediate traffic risk",
+              1,
+              "Roads Department",
+              "2-4 hours",
+              "low",
+              ["traffic_control"],
+              ["Mark hazard", "Limit access", "Inspect damage"],
+              "Vehicle and pedestrian risk reduced",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "road_repair",
+              "Repair Traffic-Damaged Road",
+              "Restore the damaged carriageway for safe heavy vehicle use",
+              2,
+              "Roads Department",
+              "1-2 days",
+              "medium",
+              ["asphalt_paver", "compactor"],
+              ["Assess damage extent", "Prepare reinforced base", "Lay asphalt", "Compact"],
               "Road is restored and safe",
             ),
           ],
