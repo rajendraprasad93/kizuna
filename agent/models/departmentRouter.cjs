@@ -10,8 +10,9 @@ class DepartmentRouter {
           "blocked_drain",
           "water_accumulation",
           "sewer_overflow",
+          "water_leak",  // Add water infrastructure issues
         ],
-        caps: ["drain", "water", "flood"],
+        caps: ["drain", "water", "flood", "pipe", "leak", "hydrant"],
         max: 10,
         time: {
           emergency: "1-2 hours",
@@ -49,9 +50,9 @@ class DepartmentRouter {
           "waste_accumulation",
           "illegal_dumping",
           "overflowing_bins",
-          "sanitation_issue",
+          "sanitation_issue",  // Add general sanitation issues
         ],
-        caps: ["garbage", "waste", "dump"],
+        caps: ["garbage", "waste", "dump", "sewage", "sanitation"],
         max: 15,
         time: {
           emergency: "2-4 hours",
@@ -189,10 +190,19 @@ class DepartmentRouter {
       "General Department": "General Department"
     };
     
+    // Special context-based canonical mapping
+    // When Drainage handles water infrastructure (not storm drains), map to "Water Department"
+    this.contextualCanonicalNames = {
+      "Drainage Department": {
+        default: "Public Works",
+        waterInfrastructure: "Water Department"  // When handling water supply/pipes
+      }
+    };
+    
     this.map = {
       flooding: ["drainage", "emergency", "environment"],
       pothole: ["roads", "drainage"],
-      garbage: ["sanitation"],
+      garbage: ["sanitation", "parks"],  // Parks can handle garbage in parks
       streetlight_outage: ["electricity"],
       electrical_hazard: ["electricity", "emergency"],
       tree_fall: ["parks", "emergency"],
@@ -201,6 +211,8 @@ class DepartmentRouter {
       road_damage: ["roads", "drainage"],
       blocked_drain: ["drainage", "sanitation"],
       water_contamination: ["environment", "drainage"],
+      water_leak: ["drainage"],  // Add water leak routing
+      sanitation_issue: ["sanitation", "drainage"],  // Add sanitation issue routing
       power_outage: ["electricity"],
       exposed_wire: ["electricity", "emergency"],
       illegal_dumping: ["sanitation", "environment"],
@@ -250,8 +262,8 @@ class DepartmentRouter {
           )
         : 0;
     return {
-      primary_department: p ? this.pub(p, sev) : null,
-      secondary_departments: s.map((x) => this.pub(x, sev)),
+      primary_department: p ? this.pub(p, sev, report, rca) : null,
+      secondary_departments: s.map((x) => this.pub(x, sev, report, rca)),
       support_departments: sup.map((x) => ({
         id: x.d.id,
         name: x.d.name,
@@ -294,14 +306,54 @@ class DepartmentRouter {
         return dep === depKey || dep.includes(depKey) || depKey.includes(dep);
       })
         ? 0.9
-        : 0.3,
-      score =
-        0.4 * type +
-        0.25 * cap +
-        0.15 * sm +
-        0.1 * av +
-        0.05 * 0.8 +
-        0.05 * align;
+        : 0.3;
+    
+    // Enhanced scoring: Consider location context and RCA cause alignment
+    const location = (report.location || '').toLowerCase();
+    const reportText = ((report.title || '') + ' ' + (report.description || '')).toLowerCase();
+    const rcaCause = (rca?.most_likely_cause?.cause || '').toLowerCase();
+    
+    let locationBoost = 0;
+    let rcaCauseBoost = 0;
+    
+    // Location-based routing: Parks department for park locations
+    if (d.id === 'parks') {
+      // Check both location field and report text for park mentions
+      // But only if actually IN a park, not on a street named "Park" or near a park
+      const hasParkLocation = location.includes(' park') && !location.includes('park street') && 
+                              !location.includes('next to') && !location.includes('near');
+      const hasParkInText = (reportText.includes('in the park') || reportText.includes('in park') || 
+                            reportText.includes('at the park') || reportText.includes('at park') ||
+                            reportText.includes('central park')) && 
+                            !reportText.includes('next to the park') && !reportText.includes('near the park');
+      
+      if (hasParkLocation || hasParkInText) {
+        locationBoost = 0.8; // Extremely strong boost - parks have jurisdiction over their own facilities
+      }
+    }
+    
+    // RCA cause should strongly influence department selection
+    // Waste management issues → Sanitation (even if category is blocked_drain)
+    if (d.id === 'sanitation') {
+      if (rcaCause.includes('waste') || rcaCause.includes('collection') || rcaCause.includes('garbage')) {
+        rcaCauseBoost = 0.35; // Strong boost for waste-related RCA causes (reduced from 0.4 to allow park jurisdiction)
+      }
+      // Sewage/sanitation issues should route to Sanitation
+      if (reportText.includes('sewage') || reportText.includes('sewer') || report.category === 'sanitation_issue') {
+        rcaCauseBoost = Math.max(rcaCauseBoost, 0.5); // Very strong boost for sewage issues
+      }
+    }
+      
+    let score =
+      0.3 * type +
+      0.25 * cap +
+      0.15 * sm +
+      0.1 * av +
+      0.05 * 0.8 +
+      0.05 * align +
+      locationBoost +
+      rcaCauseBoost;
+      
     if (d.id === "general") score *= 0.65;
     if (sev === "emergency" && d.id === "emergency")
       score = Math.max(score, 0.9);
@@ -309,6 +361,8 @@ class DepartmentRouter {
     let reason = [];
     if (type === 1) reason.push("strong problem-type match");
     if (cap >= 0.7) reason.push("root-cause capability match");
+    if (locationBoost > 0) reason.push("location context match");
+    if (rcaCauseBoost > 0) reason.push("RCA cause alignment");
     if (st.available === false) reason.push("department unavailable");
     else if ((st.load || 0) >= 0.8) reason.push("high workload");
     if (align >= 0.7) reason.push("Model 4 alignment");
@@ -322,14 +376,35 @@ class DepartmentRouter {
   }
   
   // Get canonical department name for external API
-  getCanonicalName(internalName) {
+  getCanonicalName(internalName, context = {}) {
+    // Check for contextual mapping
+    const contextualMapping = this.contextualCanonicalNames[internalName];
+    if (contextualMapping) {
+      // Check if this is water infrastructure context
+      const category = (context.category || '').toLowerCase();
+      const rcaCause = (context.rcaCause || '').toLowerCase();
+      
+      if (category === 'water_leak' || 
+          rcaCause.includes('water_infrastructure') ||
+          rcaCause.includes('equipment_failure')) {
+        return contextualMapping.waterInfrastructure;
+      }
+      
+      return contextualMapping.default;
+    }
+    
     return this.canonicalNames[internalName] || internalName;
   }
   
-  pub(x, sev) {
+  pub(x, sev, report = {}, rca = {}) {
+    const context = {
+      category: report.category,
+      rcaCause: rca.most_likely_cause?.cause
+    };
+    
     return {
       id: x.d.id,
-      name: this.getCanonicalName(x.d.name),  // Use canonical name for external output
+      name: this.getCanonicalName(x.d.name, context),  // Use canonical name for external output
       internal_name: x.d.name,  // Keep internal name for reference
       confidence: x.score,
       reason: x.reason,
