@@ -420,11 +420,12 @@ class RootCauseAnalysisModel {
           label: "Equipment Failure",
           category: "infrastructure",
           urgency: "high",
-          base_confidence: 0.7,
+          base_confidence: 0.75,
           evidence_patterns: [
             "not_working", "broken", "failed", "malfunction",
             "out", "dead", "faulty", "damaged", "isolated", "single",
-            "one", "specific"
+            "one", "specific", "transformer", "hydrant", "buzzing",
+            "crackling", "smells", "burning"
           ],
           action: "Repair or replace failed equipment"
         },
@@ -548,11 +549,23 @@ class RootCauseAnalysisModel {
       ],
       water_leak: [
         {
+          id: "equipment_failure",
+          label: "Equipment Failure",
+          category: "infrastructure",
+          urgency: "high",
+          base_confidence: 0.75,
+          evidence_patterns: [
+            "hydrant", "valve", "meter", "fixture", "equipment",
+            "constantly", "leaking_constantly"
+          ],
+          action: "Repair or replace failed water equipment"
+        },
+        {
           id: "connection_failure",
           label: "Connection Failure",
           category: "infrastructure",
           urgency: "high",
-          base_confidence: 0.75,
+          base_confidence: 0.7,
           evidence_patterns: [
             "leak", "leaking", "broken", "crack", "pipe",
             "connection", "joint", "failure", "burst"
@@ -564,10 +577,11 @@ class RootCauseAnalysisModel {
           label: "Water Infrastructure Damage",
           category: "infrastructure",
           urgency: "high",
-          base_confidence: 0.7,
+          base_confidence: 0.75,
           evidence_patterns: [
             "infrastructure", "main", "water_main", "underground",
-            "damage", "deterioration", "corrosion"
+            "damage", "deterioration", "corrosion", "broke",
+            "pipe_broke", "spraying"
           ],
           action: "Inspect and repair water infrastructure"
         },
