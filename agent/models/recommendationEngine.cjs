@@ -938,7 +938,6 @@ class RecommendationEngine {
       const categoryMap = {
         "streetlight outage": "streetlight",
         "street light": "streetlight",
-        "electrical hazard": "streetlight",  // Electrical issues often map to streetlight templates
         "power outage": "streetlight",
         "blocked drain": "flooding",  // Drain issues use flooding templates
         "drainage": "flooding",
