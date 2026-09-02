@@ -173,6 +173,22 @@ class DepartmentRouter {
         phone: "311",
       },
     };
+    
+    // Canonical department name mapping for external API contract
+    // Maps internal production names to standardized external names
+    this.canonicalNames = {
+      "Sanitation Department": "Sanitation",
+      "Electricity Department": "Electrical Services",
+      "Parks & Recreation Department": "Parks and Recreation",
+      "Roads Department": "Public Works",  // Roads is a Public Works sub-department
+      "Drainage Department": "Public Works", // Drainage is a Public Works sub-department
+      // Departments that use canonical names already:
+      "City Planning Department": "City Planning Department",
+      "Environmental Department": "Environmental Department",
+      "Emergency Services": "Emergency Services",
+      "General Department": "General Department"
+    };
+    
     this.map = {
       flooding: ["drainage", "emergency", "environment"],
       pothole: ["roads", "drainage"],
@@ -304,10 +320,17 @@ class DepartmentRouter {
       available: st.available !== false,
     };
   }
+  
+  // Get canonical department name for external API
+  getCanonicalName(internalName) {
+    return this.canonicalNames[internalName] || internalName;
+  }
+  
   pub(x, sev) {
     return {
       id: x.d.id,
-      name: x.d.name,
+      name: this.getCanonicalName(x.d.name),  // Use canonical name for external output
+      internal_name: x.d.name,  // Keep internal name for reference
       confidence: x.score,
       reason: x.reason,
       expected_response_time: this.time(x.d, sev),
