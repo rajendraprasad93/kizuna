@@ -230,6 +230,7 @@ class RecommendationEngine {
         "foundation_failure",
         "age_deterioration_or_construction_quality",
         "poor_construction_quality",
+        "poor_repair_quality",  // Failed road repairs
       ],
       heavy_vehicle_traffic: [
         "Heavy Vehicle Traffic",
@@ -244,6 +245,7 @@ class RecommendationEngine {
         "Garbage Collection Failure",
         "Overflowing Waste",
         "inadequate_collection_service",
+        "inadequate_waste_management",  // Waste management issues
       ],
       illegal_dumping: [
         "Illegal Dumping",
@@ -266,6 +268,7 @@ class RecommendationEngine {
         "Leaning Streetlight Pole",
         "physical_damage",
         "physical_damage_or_age",
+        "storm_damage",  // Storm damage to infrastructure
       ],
       water_supply_leak: [
         "Water Leak",
@@ -694,6 +697,37 @@ class RecommendationEngine {
             ),
           ],
         },
+        "water_supply_leak": {
+          // Water infrastructure damage causing road damage
+          immediate: [
+            this.action(
+              "road_temp_safety",
+              "Install Temporary Safety Measures",
+              "Restrict access and protect the damaged area",
+              1,
+              "Roads Department",
+              "2-4 hours",
+              "low",
+              ["traffic_control"],
+              ["Mark hazard", "Limit access", "Inspect"],
+              "Vehicle and pedestrian risk reduced",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "road_repair",
+              "Repair Damaged Road Surface",
+              "Restore the damaged carriageway for safe use",
+              2,
+              "Roads Department",
+              "1-2 days",
+              "medium",
+              ["asphalt_paver", "compactor"],
+              ["Cut damaged section", "Prepare base", "Lay asphalt", "Compact"],
+              "Road is restored and safe",
+            ),
+          ],
+        },
       },
       streetlight: {
         "Streetlight Electrical Fault": {
@@ -973,6 +1007,7 @@ class RecommendationEngine {
       
       // Category aliases for template matching
       const categoryMap = {
+        "pothole": "road_damage",  // Potholes use road_damage templates
         "streetlight outage": "streetlight",
         "street light": "streetlight",
         "power outage": "streetlight",
