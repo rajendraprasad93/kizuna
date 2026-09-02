@@ -32,13 +32,13 @@ const duplicateDetection = {
         const roadBridge =
           (candidate.category === "pothole" && report?.category === "road_damage") ||
           (candidate.category === "road_damage" && report?.category === "pothole");
-        // Drainage system bridges
-        const drainageBridge =
-          (report?.category === "flooding" && candidate.category === "blocked_drain") ||
+        // Sewage drainage bridge (bidirectional) - same underlying sewage system issue
+        // Note: flooding + blocked_drain is NOT included - these are cause/effect, not duplicates
+        const sewerBridge =
           (report?.category === "sanitation_issue" && candidate.category === "blocked_drain") ||
           (report?.category === "blocked_drain" && candidate.category === "sanitation_issue");
         
-        const categoriesMatch = exactMatch || wasteBridge || roadBridge || drainageBridge;
+        const categoriesMatch = exactMatch || wasteBridge || roadBridge || sewerBridge;
         
         const proximityKm = haversineKm(report, candidate);
         return categoriesMatch && proximityKm <= 0.5;
