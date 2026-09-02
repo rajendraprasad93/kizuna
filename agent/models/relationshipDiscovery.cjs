@@ -83,8 +83,15 @@ class RelationshipDiscoveryModel {
         ...temporal,
       ]);
 
+      // Add direct causal evidence for existing reports
+      const directCausalEvidence = this.findDirectCausalEvidence(problemType, existingReports);
+      const allRelationships = this.mergeAndRank([
+        ...relationships,
+        ...directCausalEvidence,
+      ]);
+
       // Enhance relationships with better classification
-      const enhancedRelationships = relationships.map(rel => {
+      const enhancedRelationships = allRelationships.map(rel => {
         const enhancedType = this.classifyRelationshipType(problemType, rel.target, rel);
         return {
           ...rel,
@@ -381,6 +388,79 @@ class RelationshipDiscoveryModel {
       total_relationships: 0,
       has_significant_relationships: false,
     };
+  }
+
+  findDirectCausalEvidence(problemType, existingReports) {
+    const evidence = [];
+    
+    // Define strong causal pairs for direct evidence detection
+    const causalPairs = [
+      ['electrical_hazard', 'streetlight_outage'],
+      ['streetlight_outage', 'electrical_hazard'],
+      ['water_leak', 'pothole'],
+      ['pothole', 'water_leak'],
+      ['tree_fall', 'electrical_hazard'],
+      ['electrical_hazard', 'tree_fall'],
+      ['garbage', 'sanitation_issue'],
+      ['sanitation_issue', 'garbage'],
+      ['sanitation_issue', 'blocked_drain'],
+      ['blocked_drain', 'sanitation_issue'],
+      ['road_damage', 'water_leak'],
+      ['water_leak', 'road_damage'],
+      ['blocked_drain', 'garbage'],
+      ['garbage', 'blocked_drain']
+    ];
+    
+    for (const existingReport of existingReports) {
+      const existingCategory = this.normalizeCategory(existingReport.category);
+      if (!existingCategory || existingCategory === problemType) continue;
+      
+      // Check if this forms a known causal pair
+      const isCausalPair = causalPairs.some(([source, target]) => 
+        problemType === source && existingCategory === target
+      );
+      
+      if (isCausalPair) {
+        evidence.push({
+          source: problemType,
+          target: existingCategory,
+          type: "direct_causal",
+          strength: 0.8,
+          confidence: 0.75,
+          evidence: [
+            `Direct causal relationship: ${problemType} directly relates to ${existingCategory}`,
+            `Evidence found in existing report: ${existingReport.id || 'report'}`
+          ],
+          discovered_from: "direct_causal_evidence",
+          is_historical: false,
+          is_location_based: false,
+          is_temporal: false,
+          relationship_type: "causal"
+        });
+      }
+      
+      // Check for spatial relationships (same category)
+      if (problemType === existingCategory) {
+        evidence.push({
+          source: problemType,
+          target: existingCategory,
+          type: "spatial_same",
+          strength: 0.7,
+          confidence: 0.65,
+          evidence: [
+            `Spatial relationship: Multiple ${problemType} incidents in same area`,
+            `Evidence found in existing report: ${existingReport.id || 'report'}`
+          ],
+          discovered_from: "spatial_clustering",
+          is_historical: false,
+          is_location_based: true,
+          is_temporal: false,
+          relationship_type: "spatial"
+        });
+      }
+    }
+    
+    return evidence;
   }
 
   // Enhanced relationship classification for benchmark compatibility
