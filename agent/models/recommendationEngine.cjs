@@ -216,6 +216,8 @@ class RecommendationEngine {
         "Water Accumulation",
         "Standing Water",
         "Flood Water",
+        "stormwater_capacity_exceeded",
+        "inadequate_slope_or_capacity",
       ],
       road_damage: [
         "Road Damage",
@@ -225,6 +227,9 @@ class RecommendationEngine {
         "Water Damage to Asphalt",
         "pothole",
         "Pothole Damage",
+        "foundation_failure",
+        "age_deterioration_or_construction_quality",
+        "poor_construction_quality",
       ],
       heavy_vehicle_traffic: [
         "Heavy Vehicle Traffic",
@@ -926,7 +931,25 @@ class RecommendationEngine {
     departmentStatus = {},
   ) {
     try {
-      const problemType = this.normalizeText(report?.category || "unknown");
+      // Normalize category for template matching
+      let problemType = this.normalizeText(report?.category || "unknown");
+      
+      // Category aliases for template matching
+      const categoryMap = {
+        "streetlight outage": "streetlight",
+        "street light": "streetlight",
+        "electrical hazard": "streetlight",  // Electrical issues often map to streetlight templates
+        "power outage": "streetlight",
+        "blocked drain": "flooding",  // Drain issues use flooding templates
+        "drainage": "flooding",
+        "sanitation issue": "flooding",  // Sewage/sanitation use flooding/drainage templates
+        "sewer": "flooding",
+        "tree fall": "road_damage",  // Tree falls use road damage (obstruction) templates
+        "road damage": "road_damage"
+      };
+      
+      problemType = categoryMap[problemType] || problemType;
+      
       const rawRootCause =
         rootCauseAnalysis?.most_likely_cause?.cause || "Unknown";
       const canonicalRootCause = this.canonicalizeRootCause(rawRootCause);
