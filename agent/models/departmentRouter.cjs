@@ -368,10 +368,28 @@ class DepartmentRouter {
       0.05 * align +
       locationBoost +
       rcaCauseBoost;
+    
+    // Emergency severity boost for specialized departments with clear jurisdiction
+    // Infrastructure emergencies should route to responsible specialized department
+    if (sev === "emergency" && d.id !== "emergency" && d.id !== "general") {
+      // Boost specialized departments for their core infrastructure in emergencies
+      if (type === 1) { // Strong type match
+        score += 0.15; // Boost specialized department jurisdiction in emergencies
+      }
+    }
       
     if (d.id === "general") score *= 0.65;
-    if (sev === "emergency" && d.id === "emergency")
-      score = Math.max(score, 0.9);
+    
+    // Emergency Services boost: Only apply when no specialized department has strong jurisdiction
+    // Emergency severity indicates URGENCY, not necessarily RESPONSIBILITY
+    // Specialized departments maintain jurisdiction for their domain even in emergencies
+    if (sev === "emergency" && d.id === "emergency") {
+      // Instead of unconditional 0.9, only boost if this is a genuine emergency response situation
+      // (e.g., generic multi-domain issues, unclear jurisdiction, or true emergency coordination)
+      // If specialized department has strong type match (infrastructure issues), they should keep jurisdiction
+      score = Math.max(score, 0.75); // Reduced from 0.9 to allow specialized departments to win
+    }
+    
     if (st.available === false) score *= 0.55;
     let reason = [];
     if (type === 1) reason.push("strong problem-type match");
