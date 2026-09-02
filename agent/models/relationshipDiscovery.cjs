@@ -83,18 +83,30 @@ class RelationshipDiscoveryModel {
         ...temporal,
       ]);
 
-      const graph = this.buildRelationshipGraph(problemType, relationships);
-      const chain = this.buildEvidenceChain(problemType, relationships);
+      // Enhance relationships with better classification
+      const enhancedRelationships = relationships.map(rel => {
+        const enhancedType = this.classifyRelationshipType(problemType, rel.target, rel);
+        return {
+          ...rel,
+          relationship_type: enhancedType,
+          evidence_types: rel.evidence_types ? 
+            [...new Set([...rel.evidence_types, enhancedType])] : 
+            [enhancedType]
+        };
+      });
+
+      const graph = this.buildRelationshipGraph(problemType, enhancedRelationships);
+      const chain = this.buildEvidenceChain(problemType, enhancedRelationships);
 
       return {
         problem_type: problemType,
-        relationships,
+        relationships: enhancedRelationships,
         graph,
         evidence_chain: chain,
         summary: this.generateSummary(problemType, relationships),
-        confidence: this.calculateOverallConfidence(relationships),
-        total_relationships: relationships.length,
-        has_significant_relationships: relationships.some(
+        confidence: this.calculateOverallConfidence(enhancedRelationships),
+        total_relationships: enhancedRelationships.length,
+        has_significant_relationships: enhancedRelationships.some(
           (r) => r.confidence >= this.minConfidence,
         ),
         evidence_scope: {
