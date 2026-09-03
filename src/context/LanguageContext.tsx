@@ -236,6 +236,19 @@ const translations = {
     reportsFiledCount: '1,523',
     aiAccuracyPercent: '94%',
     resolvedPercent: '72%',
+    
+    // Dashboard specific
+    goodMorning: 'Good morning',
+    processing: 'Processing',
+    aiAnalysisInProgress: 'AI analysis in progress',
+    analysisSteps: 'Analysis Steps',
+    duplicateCheck: 'Duplicate Check',
+    relationshipDiscovery: 'Relationship Discovery',
+    causeAnalysis: 'Cause Analysis',
+    actionRecommendation: 'Action Recommendation',
+    departmentRouting: 'Department Routing',
+    areaStatus: 'Area Status',
+    helpSupport: 'Help & Support',
   },
 
   ja: {
@@ -471,6 +484,19 @@ const translations = {
     reportsFiledCount: '1,523',
     aiAccuracyPercent: '94%',
     resolvedPercent: '72%',
+    
+    // Dashboard specific
+    goodMorning: 'おはようございます',
+    processing: '処理中',
+    aiAnalysisInProgress: 'AIが問題を分析中',
+    analysisSteps: '分析ステップ',
+    duplicateCheck: '重複チェック',
+    relationshipDiscovery: '関連性の発見',
+    causeAnalysis: '原因の分析',
+    actionRecommendation: '対応策の提案',
+    departmentRouting: '部局への送信',
+    areaStatus: 'エリアの状況',
+    helpSupport: 'ヘルプ＆サポート',
   },
 } as const;
 
@@ -486,7 +512,8 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(undefine
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() => {
-    return (localStorage.getItem('civiceye-lang') as Language) || 'en';
+    // Default to Japanese for Kizuna
+    return (localStorage.getItem('civiceye-lang') as Language) || 'ja';
   });
 
   const handleSetLanguage = (lang: Language) => {
