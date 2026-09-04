@@ -117,31 +117,35 @@ export function DashboardShell({ children, title, subtitle, actions }: Dashboard
 
       {/* Main */}
       <div className="flex-1 flex flex-col min-w-0 relative z-10">
-        <header className="sticky top-0 z-20 bg-white/90 backdrop-blur-lg border-b border-pink-100/60">
-          <div className="flex items-center justify-between px-4 lg:px-8 h-16">
-            <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-20 bg-white/95 backdrop-blur-lg border-b border-pink-100/60">
+          <div className="flex items-center justify-between px-4 lg:px-8 h-20">
+            <div className="flex items-center gap-6">
               <button className="lg:hidden p-2 rounded-lg text-slate-600 hover:bg-purple-50" onClick={() => setSidebarOpen(true)}>
                 <Menu className="h-5 w-5" />
               </button>
               {isKizunaTheme && (
-                <div className="hidden md:flex items-center gap-3 bg-purple-50/50 rounded-xl px-4 py-2 max-w-md">
-                  <Search className="h-4 w-4 text-purple-400" />
+                <div className="hidden md:flex items-center gap-3 bg-purple-50/70 rounded-2xl px-6 py-3 max-w-md border border-purple-100">
+                  <Search className="h-5 w-5 text-purple-400" />
                   <input
                     type="text"
                     placeholder="レポートを検索..."
-                    className="bg-transparent border-none outline-none text-sm flex-1 text-slate-700 placeholder-purple-400"
+                    className="bg-transparent border-none outline-none text-sm flex-1 text-slate-700 placeholder-purple-400 font-medium"
                   />
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
               {actions}
-              <LanguageToggle />
-              <Link to="/notifications" className={`p-2 rounded-lg transition-colors relative ${isKizunaTheme ? 'text-purple-500 hover:bg-purple-50' : 'text-slate-500 hover:bg-slate-100'}`}>
+              <div className="flex items-center gap-2 bg-slate-100 rounded-xl p-1">
+                <button className="px-3 py-2 text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors">EN</button>
+                <button className="px-3 py-2 text-sm font-medium bg-white text-slate-900 rounded-lg shadow-sm">日本語</button>
+              </div>
+              <Link to="/notifications" className={`p-3 rounded-xl transition-colors relative ${isKizunaTheme ? 'text-purple-500 hover:bg-purple-50' : 'text-slate-500 hover:bg-slate-100'}`}>
                 <Bell className="h-5 w-5" />
+                <span className="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full"></span>
               </Link>
               {isKizunaTheme && (
-                <Link to="/report/new" className="hidden sm:flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-all">
+                <Link to="/report/new" className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-3 rounded-2xl text-sm font-semibold hover:from-purple-600 hover:to-pink-600 transition-all shadow-lg hover:shadow-xl">
                   <Plus className="h-4 w-4" />
                   新しい報告をする
                 </Link>

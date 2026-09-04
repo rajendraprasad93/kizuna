@@ -59,124 +59,128 @@ export function CitizenDashboard() {
   return (
     <DashboardShell title="" subtitle="">
       <div className="space-y-8">
-        {/* Hero Section with Japanese Greeting */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-purple-100 via-pink-50 to-purple-50 p-8 lg:p-12">
+        {/* Hero Section with Japanese Greeting - Enhanced */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100/80 via-purple-50/60 to-blue-50/40 p-8 lg:p-12 border border-white/50 shadow-lg">
           {/* Enhanced Japanese Cultural Background */}
           <div className="absolute inset-0">
-            {/* Sakura petals floating animation */}
-            <div className="absolute top-4 right-8 w-20 h-20 opacity-8 animate-float">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-pink-300">
-                <path d="M50 10 L60 30 L80 25 L65 45 L85 60 L60 55 L50 75 L40 55 L15 60 L35 45 L20 25 L40 30 Z" fill="currentColor" />
-              </svg>
-            </div>
-            <div className="absolute bottom-8 right-20 w-16 h-16 opacity-8 animate-pulse">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-purple-300">
-                <path d="M50 10 L60 30 L80 25 L65 45 L85 60 L60 55 L50 75 L40 55 L15 60 L35 45 L20 25 L40 30 Z" fill="currentColor" />
-              </svg>
-            </div>
-            
-            {/* Traditional Japanese Wave Pattern (Seigaiha) */}
-            <div className="absolute top-0 left-0 w-full h-32 opacity-5">
-              <svg viewBox="0 0 400 100" className="w-full h-full text-purple-400">
-                <defs>
-                  <pattern id="seigaiha" patternUnits="userSpaceOnUse" width="40" height="20">
-                    <circle cx="20" cy="20" r="20" fill="none" stroke="currentColor" strokeWidth="1"/>
-                    <circle cx="0" cy="20" r="20" fill="none" stroke="currentColor" strokeWidth="1"/>
-                    <circle cx="40" cy="20" r="20" fill="none" stroke="currentColor" strokeWidth="1"/>
-                  </pattern>
-                </defs>
-                <rect width="400" height="100" fill="url(#seigaiha)"/>
+            {/* Beautiful cherry blossom tree branch */}
+            <div className="absolute top-0 right-0 w-80 h-40 opacity-15">
+              <svg viewBox="0 0 200 100" className="w-full h-full text-pink-400">
+                <path d="M20 80 Q60 40 100 50 Q140 60 180 30" stroke="currentColor" strokeWidth="3" fill="none"/>
+                <path d="M40 70 Q50 60 60 65" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <path d="M80 55 Q90 45 100 50" stroke="currentColor" strokeWidth="2" fill="none"/>
+                <path d="M120 65 Q130 55 140 60" stroke="currentColor" strokeWidth="2" fill="none"/>
+                
+                {/* Cherry blossoms */}
+                <g fill="currentColor" opacity="0.8">
+                  <circle cx="45" cy="65" r="4"/>
+                  <circle cx="52" cy="62" r="3"/>
+                  <circle cx="38" cy="68" r="3"/>
+                  <circle cx="85" cy="52" r="4"/>
+                  <circle cx="92" cy="48" r="3"/>
+                  <circle cx="78" cy="55" r="3"/>
+                  <circle cx="125" cy="62" r="4"/>
+                  <circle cx="132" cy="58" r="3"/>
+                  <circle cx="118" cy="65" r="3"/>
+                </g>
               </svg>
             </div>
             
-            {/* Mount Fuji silhouette */}
-            <div className="absolute bottom-0 right-4 w-32 h-20 opacity-6">
-              <svg viewBox="0 0 120 60" className="w-full h-full text-purple-200">
-                <path d="M0 60 L30 60 L60 20 L90 60 L120 60 L120 60 L0 60 Z" fill="currentColor"/>
-                <path d="M45 35 L60 20 L75 35 L75 40 L45 40 Z" fill="white" opacity="0.3"/>
+            {/* Mount Fuji silhouette - more prominent */}
+            <div className="absolute bottom-0 right-8 w-48 h-32 opacity-8">
+              <svg viewBox="0 0 150 80" className="w-full h-full text-purple-300">
+                <path d="M0 80 L40 80 L75 25 L110 80 L150 80 L150 80 L0 80 Z" fill="currentColor"/>
+                <path d="M60 45 L75 25 L90 45 L90 52 L60 52 Z" fill="white" opacity="0.4"/>
+                <path d="M68 50 L75 40 L82 50 L82 52 L68 52 Z" fill="white" opacity="0.6"/>
               </svg>
             </div>
             
-            {/* Bamboo leaves on left */}
-            <div className="absolute top-8 left-4 w-24 h-32 opacity-6">
-              <svg viewBox="0 0 60 80" className="w-full h-full text-green-300">
-                <path d="M10 10 Q15 5 25 10 Q30 15 25 25 Q20 30 10 25 Q5 20 10 10" fill="currentColor"/>
-                <path d="M15 30 Q20 25 30 30 Q35 35 30 45 Q25 50 15 45 Q10 40 15 30" fill="currentColor"/>
-                <path d="M20 50 Q25 45 35 50 Q40 55 35 65 Q30 70 20 65 Q15 60 20 50" fill="currentColor"/>
-                <line x1="12" y1="15" x2="55" y2="75" stroke="currentColor" strokeWidth="2" opacity="0.5"/>
+            {/* Traditional Japanese clouds */}
+            <div className="absolute top-4 left-1/3 w-32 h-16 opacity-8">
+              <svg viewBox="0 0 80 40" className="w-full h-full text-blue-300">
+                <path d="M10 25 Q5 20 10 15 Q15 10 25 15 Q35 10 45 15 Q55 10 65 15 Q70 20 65 25 Q60 30 50 25 Q40 30 30 25 Q20 30 10 25" fill="currentColor"/>
               </svg>
             </div>
             
-            {/* Torii gate silhouette */}
-            <div className="absolute top-12 right-32 w-16 h-12 opacity-4">
-              <svg viewBox="0 0 40 30" className="w-full h-full text-red-300">
-                <rect x="8" y="0" width="2" height="30" fill="currentColor"/>
-                <rect x="30" y="0" width="2" height="30" fill="currentColor"/>
-                <rect x="2" y="6" width="36" height="3" rx="1" fill="currentColor"/>
-                <rect x="4" y="12" width="32" height="2" fill="currentColor"/>
+            {/* Torii gate - more detailed */}
+            <div className="absolute top-8 right-16 w-20 h-16 opacity-6">
+              <svg viewBox="0 0 50 40" className="w-full h-full text-red-400">
+                <rect x="12" y="0" width="3" height="40" fill="currentColor"/>
+                <rect x="35" y="0" width="3" height="40" fill="currentColor"/>
+                <rect x="2" y="8" width="46" height="4" rx="2" fill="currentColor"/>
+                <rect x="6" y="16" width="38" height="3" fill="currentColor"/>
               </svg>
             </div>
           </div>
           
-          <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="text-3xl">👋</div>
-                <h1 className="text-3xl lg:text-4xl font-bold text-slate-900">
-                  {greeting}、<span className="text-purple-600">{profile?.full_name?.split(' ')[0]}</span> さん
+          <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+            <div className="flex-1 max-w-2xl">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="text-4xl">👋</div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                  {greeting}、<span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{profile?.full_name?.split(' ')[0]}</span> さん
                 </h1>
               </div>
-              <p className="text-slate-600 text-lg mb-6 flex items-center gap-2">
-                🌸 {t('trackReports')}
+              <p className="text-slate-600 text-xl mb-8 flex items-center gap-3 leading-relaxed">
+                <span className="text-2xl">🌸</span>
+                <span>報告状況とAI分析をリアルタイムで確認できます。</span>
               </p>
               <Link to="/report/new">
-                <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-lg">
-                  <Plus className="h-5 w-5" />
-                  {t('reportAProblem')}
+                <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white shadow-xl hover:shadow-2xl text-lg px-8 py-4 rounded-2xl font-semibold">
+                  <Plus className="h-6 w-6" />
+                  問題を報告する
                 </Button>
               </Link>
             </div>
             
-            {/* Japanese calligraphy style decoration */}
-            <div className="hidden lg:flex items-center justify-center w-32 h-32 opacity-10">
-              <svg viewBox="0 0 100 100" className="w-full h-full text-purple-600">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" strokeWidth="1"/>
-                <path d="M30 50 Q50 30 70 50 Q50 70 30 50" fill="currentColor" opacity="0.3"/>
-                <text x="50" y="58" textAnchor="middle" fontSize="24" fill="currentColor" fontFamily="serif">絆</text>
+            {/* Japanese zen circle with kizuna character */}
+            <div className="hidden lg:flex items-center justify-center w-40 h-40 opacity-15">
+              <svg viewBox="0 0 120 120" className="w-full h-full text-purple-600">
+                <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5"/>
+                <text x="60" y="75" textAnchor="middle" fontSize="36" fill="currentColor" fontFamily="serif" fontWeight="bold">絆</text>
               </svg>
             </div>
           </div>
         </div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Statistics Cards - Enhanced to match inspiration */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           <KizunaStatCard
             icon={FileText}
-            label={t('totalReports')}
+            label="総報告数"
             value={stats.total}
             subtext="これまでの合計"
             color="blue"
+            bgColor="bg-blue-50/80"
+            iconColor="bg-blue-500"
           />
           <KizunaStatCard
             icon={Cpu}
-            label={t('processing')}
+            label="処理中"
             value={stats.processing}
             subtext="AI分析中"
             color="purple"
+            bgColor="bg-purple-50/80"
+            iconColor="bg-purple-500"
           />
           <KizunaStatCard
             icon={Clock}
-            label={t('active')}
+            label="対応中"
             value={stats.active}
             subtext="対応中"
             color="orange"
+            bgColor="bg-orange-50/80"
+            iconColor="bg-orange-500"
           />
           <KizunaStatCard
             icon={CheckCircle2}
-            label={t('resolved')}
+            label="解決済み"
             value={stats.resolved}
             subtext="解決済み"
             color="green"
+            bgColor="bg-emerald-50/80"
+            iconColor="bg-emerald-500"
           />
         </div>
 
@@ -409,134 +413,87 @@ export function CitizenDashboard() {
   );
 }
 
-function KizunaStatCard({ icon: Icon, label, value, subtext, color }: { 
+function KizunaStatCard({ icon: Icon, label, value, subtext, color, bgColor, iconColor }: { 
   icon: typeof FileText; 
   label: string; 
   value: number; 
   subtext: string;
   color: string;
+  bgColor: string;
+  iconColor: string;
 }) {
   const colorConfig = {
     blue: {
-      bg: 'from-blue-50 to-blue-100/50',
-      icon: 'from-blue-500 to-blue-600',
-      text: 'text-blue-600',
-      border: 'border-blue-100',
-      accent: 'text-blue-300'
+      textColor: 'text-blue-700',
+      iconBg: 'bg-blue-500',
+      accent: 'text-blue-400',
+      dot: 'bg-blue-400'
     },
     purple: {
-      bg: 'from-purple-50 to-purple-100/50',
-      icon: 'from-purple-500 to-purple-600',
-      text: 'text-purple-600',
-      border: 'border-purple-100',
-      accent: 'text-purple-300'
+      textColor: 'text-purple-700',
+      iconBg: 'bg-purple-500',
+      accent: 'text-purple-400',
+      dot: 'bg-purple-400'
     },
     orange: {
-      bg: 'from-orange-50 to-orange-100/50',
-      icon: 'from-orange-500 to-orange-600',
-      text: 'text-orange-600',
-      border: 'border-orange-100',
-      accent: 'text-orange-300'
+      textColor: 'text-orange-700',
+      iconBg: 'bg-orange-500',
+      accent: 'text-orange-400',
+      dot: 'bg-orange-400'
     },
     green: {
-      bg: 'from-emerald-50 to-emerald-100/50',
-      icon: 'from-emerald-500 to-emerald-600',
-      text: 'text-emerald-600',
-      border: 'border-emerald-100',
-      accent: 'text-emerald-300'
+      textColor: 'text-emerald-700',
+      iconBg: 'bg-emerald-500',
+      accent: 'text-emerald-400',
+      dot: 'bg-emerald-400'
     },
   };
 
   const config = colorConfig[color as keyof typeof colorConfig] || colorConfig.blue;
 
-  // Different Japanese cultural elements for each card
-  const culturalElements = {
-    blue: (
-      <div className="absolute top-2 right-2 w-8 h-8 opacity-20">
-        <svg viewBox="0 0 40 40" className={`w-full h-full ${config.accent}`}>
-          {/* Water ripples (mizu) */}
-          <circle cx="20" cy="20" r="15" fill="none" stroke="currentColor" strokeWidth="1"/>
-          <circle cx="20" cy="20" r="10" fill="none" stroke="currentColor" strokeWidth="1"/>
-          <circle cx="20" cy="20" r="5" fill="none" stroke="currentColor" strokeWidth="1"/>
-        </svg>
-      </div>
-    ),
-    purple: (
-      <div className="absolute top-2 right-2 w-10 h-8 opacity-20">
-        <svg viewBox="0 0 40 32" className={`w-full h-full ${config.accent}`}>
-          {/* Cherry blossom branch */}
-          <path d="M5 20 Q20 10 35 20" stroke="currentColor" strokeWidth="1.5" fill="none"/>
-          <circle cx="15" cy="16" r="2" fill="currentColor"/>
-          <circle cx="25" cy="16" r="2" fill="currentColor"/>
-          <path d="M15 16 L13 14 L17 14 L15 18 L13 14" fill="currentColor" opacity="0.6"/>
-          <path d="M25 16 L23 14 L27 14 L25 18 L23 14" fill="currentColor" opacity="0.6"/>
-        </svg>
-      </div>
-    ),
-    orange: (
-      <div className="absolute top-2 right-2 w-8 h-8 opacity-20">
-        <svg viewBox="0 0 32 32" className={`w-full h-full ${config.accent}`}>
-          {/* Traditional fan pattern */}
-          <path d="M16 28 L8 16 L16 16 L24 16 Z" fill="currentColor"/>
-          <path d="M16 16 L8 16" stroke="white" strokeWidth="0.5"/>
-          <path d="M16 16 L12 16" stroke="white" strokeWidth="0.5"/>
-          <path d="M16 16 L20 16" stroke="white" strokeWidth="0.5"/>
-          <path d="M16 16 L24 16" stroke="white" strokeWidth="0.5"/>
-        </svg>
-      </div>
-    ),
-    green: (
-      <div className="absolute top-2 right-2 w-8 h-8 opacity-20">
-        <svg viewBox="0 0 32 32" className={`w-full h-full ${config.accent}`}>
-          {/* Bamboo pattern */}
-          <rect x="14" y="4" width="4" height="24" fill="currentColor" rx="2"/>
-          <rect x="12" y="10" width="8" height="1.5" fill="currentColor"/>
-          <rect x="12" y="18" width="8" height="1.5" fill="currentColor"/>
-          <path d="M10 8 Q12 6 14 8" stroke="currentColor" strokeWidth="1" fill="none"/>
-          <path d="M18 8 Q20 6 22 8" stroke="currentColor" strokeWidth="1" fill="none"/>
-        </svg>
-      </div>
-    ),
-  };
-
   return (
-    <Card className={`relative p-6 bg-gradient-to-br ${config.bg} border ${config.border} hover:shadow-lg transition-all overflow-hidden group`}>
-      {/* Cultural decoration in background */}
-      <div className="absolute bottom-0 left-0 w-full h-full opacity-5">
+    <div className={`relative ${bgColor} rounded-3xl p-8 border border-white/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden`}>
+      {/* Subtle background pattern */}
+      <div className="absolute inset-0 opacity-5">
         <svg viewBox="0 0 100 100" className={`w-full h-full ${config.accent}`}>
-          {/* Asanoha (hemp leaf) pattern */}
           <defs>
-            <pattern id={`asanoha-${color}`} patternUnits="userSpaceOnUse" width="20" height="20">
-              <polygon points="10,2 18,10 10,18 2,10" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-              <polygon points="10,10 14,6 18,10 14,14 10,10" fill="currentColor" opacity="0.3"/>
+            <pattern id={`pattern-${color}`} patternUnits="userSpaceOnUse" width="20" height="20">
+              <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="0.5"/>
             </pattern>
           </defs>
-          <rect width="100" height="100" fill={`url(#asanoha-${color})`}/>
+          <rect width="100" height="100" fill={`url(#pattern-${color})`}/>
         </svg>
       </div>
 
       {/* Main content */}
       <div className="relative">
-        {culturalElements[color as keyof typeof culturalElements] || culturalElements.blue}
-        
-        <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${config.icon} flex items-center justify-center mb-4 shadow-sm group-hover:scale-105 transition-transform`}>
-          <Icon className="h-6 w-6 text-white" />
+        {/* Icon */}
+        <div className={`w-14 h-14 rounded-2xl ${config.iconBg} flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform`}>
+          <Icon className="h-7 w-7 text-white" />
         </div>
         
-        <div className="text-3xl font-bold text-slate-900 mb-1 flex items-end gap-1">
-          {value}
-          <span className="text-lg opacity-60">件</span>
+        {/* Value and unit */}
+        <div className="mb-4">
+          <div className="flex items-end gap-2 mb-2">
+            <span className="text-4xl font-bold text-slate-900">{value}</span>
+            <span className="text-lg font-medium text-slate-500 mb-1">件</span>
+          </div>
         </div>
         
-        <div className="text-sm font-medium text-slate-700 mb-1">{label}</div>
-        <div className="text-xs text-slate-500 flex items-center gap-1">
-          {color === 'purple' && <span>🔮</span>}
-          {color === 'blue' && <span>📊</span>}
-          {color === 'orange' && <span>⚡</span>}
-          {color === 'green' && <span>✅</span>}
-          {subtext}
+        {/* Label */}
+        <div className="mb-3">
+          <h3 className={`text-lg font-semibold ${config.textColor}`}>{label}</h3>
+        </div>
+        
+        {/* Status indicator */}
+        <div className="flex items-center gap-2">
+          <div className={`w-2 h-2 rounded-full ${config.dot}`}></div>
+          <span className="text-sm font-medium text-slate-600">{subtext}</span>
         </div>
       </div>
-    </Card>
+
+      {/* Hover effect overlay */}
+      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-3xl"></div>
+    </div>
   );
 }
