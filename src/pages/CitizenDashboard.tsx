@@ -460,101 +460,124 @@ function KizunaStatCard({ icon: Icon, label, value, subtext, color, bgColor, ico
     switch (color) {
       case 'blue': // 総レポート数 - Geometric lines pattern
         return (
-          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-15 overflow-hidden">
-            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
-              {/* Geometric lines pattern */}
+          <div className="absolute bottom-0 right-0 w-full h-full opacity-25 overflow-hidden">
+            <svg viewBox="0 0 200 120" className={`w-full h-full ${config.pattern}`}>
+              {/* Bold geometric lines pattern */}
               <defs>
-                <pattern id="lines-blue" patternUnits="userSpaceOnUse" width="20" height="20">
-                  <path d="M0 10 L20 10" stroke="currentColor" strokeWidth="1"/>
-                  <path d="M0 5 L15 5" stroke="currentColor" strokeWidth="0.5"/>
-                  <path d="M0 15 L15 15" stroke="currentColor" strokeWidth="0.5"/>
+                <pattern id="lines-blue" patternUnits="userSpaceOnUse" width="15" height="15">
+                  <path d="M0 7 L15 7" stroke="currentColor" strokeWidth="1.5"/>
+                  <path d="M0 3 L12 3" stroke="currentColor" strokeWidth="1"/>
+                  <path d="M0 11 L12 11" stroke="currentColor" strokeWidth="1"/>
                 </pattern>
               </defs>
-              <rect width="100" height="60" fill="url(#lines-blue)"/>
-              <circle cx="80" cy="45" r="8" fill="currentColor" opacity="0.3"/>
-              <circle cx="70" cy="35" r="6" fill="currentColor" opacity="0.2"/>
-              <circle cx="85" cy="25" r="4" fill="currentColor" opacity="0.25"/>
+              <rect x="100" y="40" width="100" height="80" fill="url(#lines-blue)" opacity="0.6"/>
+              
+              {/* Large circles */}
+              <circle cx="160" cy="80" r="20" fill="currentColor" opacity="0.4"/>
+              <circle cx="140" cy="60" r="15" fill="currentColor" opacity="0.3"/>
+              <circle cx="180" cy="50" r="12" fill="currentColor" opacity="0.35"/>
+              <circle cx="170" cy="100" r="8" fill="currentColor" opacity="0.4"/>
+              
+              {/* Connecting lines */}
+              <path d="M140 60 L160 80 L180 50" stroke="currentColor" strokeWidth="2" opacity="0.3" fill="none"/>
             </svg>
           </div>
         );
       
       case 'purple': // 処理中 - Sparkle/star pattern
         return (
-          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-20 overflow-hidden">
-            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
-              {/* Sparkle/diamond pattern */}
-              <path d="M70 40 L75 35 L80 40 L75 45 Z" fill="currentColor" opacity="0.4"/>
-              <path d="M85 25 L88 22 L91 25 L88 28 Z" fill="currentColor" opacity="0.3"/>
-              <path d="M65 20 L68 17 L71 20 L68 23 Z" fill="currentColor" opacity="0.35"/>
-              <path d="M80 50 L82 48 L84 50 L82 52 Z" fill="currentColor" opacity="0.25"/>
+          <div className="absolute bottom-0 right-0 w-full h-full opacity-30 overflow-hidden">
+            <svg viewBox="0 0 200 120" className={`w-full h-full ${config.pattern}`}>
+              {/* Large sparkle/diamond pattern */}
+              <path d="M140 70 L150 60 L160 70 L150 80 Z" fill="currentColor" opacity="0.5"/>
+              <path d="M170 40 L176 34 L182 40 L176 46 Z" fill="currentColor" opacity="0.4"/>
+              <path d="M120 50 L126 44 L132 50 L126 56 Z" fill="currentColor" opacity="0.45"/>
+              <path d="M160 95 L164 91 L168 95 L164 99 Z" fill="currentColor" opacity="0.35"/>
+              <path d="M180 75 L183 72 L186 75 L183 78 Z" fill="currentColor" opacity="0.4"/>
               
-              {/* Dotted pattern */}
-              <circle cx="75" cy="15" r="2" fill="currentColor" opacity="0.2"/>
-              <circle cx="90" cy="35" r="1.5" fill="currentColor" opacity="0.25"/>
-              <circle cx="60" cy="45" r="1" fill="currentColor" opacity="0.3"/>
-              <circle cx="85" cy="45" r="1" fill="currentColor" opacity="0.2"/>
+              {/* Connecting dots and lines */}
+              <circle cx="150" cy="25" r="4" fill="currentColor" opacity="0.3"/>
+              <circle cx="180" cy="55" r="3" fill="currentColor" opacity="0.35"/>
+              <circle cx="115" cy="80" r="2.5" fill="currentColor" opacity="0.4"/>
+              <circle cx="185" cy="85" r="2" fill="currentColor" opacity="0.3"/>
               
-              {/* Grid lines */}
+              {/* Grid background */}
               <defs>
-                <pattern id="grid-purple" patternUnits="userSpaceOnUse" width="8" height="8">
-                  <path d="M8 0 L0 0 0 8" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.4"/>
+                <pattern id="grid-purple" patternUnits="userSpaceOnUse" width="12" height="12">
+                  <path d="M12 0 L0 0 0 12" fill="none" stroke="currentColor" strokeWidth="0.8" opacity="0.5"/>
                 </pattern>
               </defs>
-              <rect x="60" y="10" width="40" height="50" fill="url(#grid-purple)"/>
+              <rect x="100" y="20" width="100" height="100" fill="url(#grid-purple)"/>
             </svg>
           </div>
         );
       
       case 'green': // 解決済み - City skyline pattern
         return (
-          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-15 overflow-hidden">
-            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
-              {/* City skyline silhouette */}
-              <rect x="65" y="35" width="8" height="25" fill="currentColor" opacity="0.4"/>
-              <rect x="75" y="25" width="6" height="35" fill="currentColor" opacity="0.35"/>
-              <rect x="82" y="30" width="7" height="30" fill="currentColor" opacity="0.3"/>
-              <rect x="90" y="20" width="5" height="40" fill="currentColor" opacity="0.25"/>
-              <rect x="96" y="28" width="4" height="32" fill="currentColor" opacity="0.2"/>
+          <div className="absolute bottom-0 right-0 w-full h-full opacity-25 overflow-hidden">
+            <svg viewBox="0 0 200 120" className={`w-full h-full ${config.pattern}`}>
+              {/* Prominent city skyline silhouette */}
+              <rect x="110" y="60" width="18" height="60" fill="currentColor" opacity="0.5"/>
+              <rect x="130" y="40" width="15" height="80" fill="currentColor" opacity="0.45"/>
+              <rect x="147" y="50" width="20" height="70" fill="currentColor" opacity="0.4"/>
+              <rect x="169" y="30" width="12" height="90" fill="currentColor" opacity="0.35"/>
+              <rect x="183" y="45" width="10" height="75" fill="currentColor" opacity="0.3"/>
+              <rect x="195" y="55" width="8" height="65" fill="currentColor" opacity="0.25"/>
               
-              {/* Windows */}
-              <rect x="67" y="38" width="1" height="1" fill="white" opacity="0.6"/>
-              <rect x="69" y="40" width="1" height="1" fill="white" opacity="0.5"/>
-              <rect x="67" y="45" width="1" height="1" fill="white" opacity="0.4"/>
-              <rect x="77" y="28" width="1" height="1" fill="white" opacity="0.5"/>
-              <rect x="77" y="33" width="1" height="1" fill="white" opacity="0.4"/>
-              <rect x="84" y="35" width="1" height="1" fill="white" opacity="0.3"/>
-              <rect x="86" y="38" width="1" height="1" fill="white" opacity="0.4"/>
+              {/* Building details - windows */}
+              <rect x="115" y="70" width="2" height="3" fill="white" opacity="0.8"/>
+              <rect x="120" y="75" width="2" height="3" fill="white" opacity="0.7"/>
+              <rect x="115" y="85" width="2" height="3" fill="white" opacity="0.6"/>
+              <rect x="120" y="90" width="2" height="3" fill="white" opacity="0.8"/>
+              
+              <rect x="135" y="50" width="2" height="3" fill="white" opacity="0.7"/>
+              <rect x="139" y="55" width="2" height="3" fill="white" opacity="0.6"/>
+              <rect x="135" y="70" width="2" height="3" fill="white" opacity="0.8"/>
+              
+              <rect x="152" y="60" width="2" height="3" fill="white" opacity="0.6"/>
+              <rect x="157" y="65" width="2" height="3" fill="white" opacity="0.7"/>
+              <rect x="152" y="80" width="2" height="3" fill="white" opacity="0.5"/>
               
               {/* Clouds */}
-              <ellipse cx="80" cy="15" rx="6" ry="3" fill="currentColor" opacity="0.2"/>
-              <ellipse cx="90" cy="12" rx="4" ry="2" fill="currentColor" opacity="0.15"/>
+              <ellipse cx="160" cy="25" rx="12" ry="5" fill="currentColor" opacity="0.3"/>
+              <ellipse cx="180" cy="20" rx="8" ry="4" fill="currentColor" opacity="0.25"/>
+              <ellipse cx="140" cy="22" rx="6" ry="3" fill="currentColor" opacity="0.2"/>
             </svg>
           </div>
         );
       
       case 'orange': // 対応中 - Wave/progress pattern
         return (
-          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-18 overflow-hidden">
-            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
-              {/* Wave patterns */}
-              <path d="M60 40 Q70 35 80 40 Q90 45 100 40 L100 60 L60 60 Z" fill="currentColor" opacity="0.3"/>
-              <path d="M65 50 Q75 45 85 50 Q95 55 100 50 L100 60 L65 60 Z" fill="currentColor" opacity="0.2"/>
+          <div className="absolute bottom-0 right-0 w-full h-full opacity-28 overflow-hidden">
+            <svg viewBox="0 0 200 120" className={`w-full h-full ${config.pattern}`}>
+              {/* Bold wave patterns */}
+              <path d="M100 70 Q120 60 140 70 Q160 80 180 70 Q190 65 200 70 L200 120 L100 120 Z" fill="currentColor" opacity="0.4"/>
+              <path d="M110 85 Q130 75 150 85 Q170 95 190 85 Q195 80 200 85 L200 120 L110 120 Z" fill="currentColor" opacity="0.3"/>
+              <path d="M120 100 Q140 90 160 100 Q180 110 200 100 L200 120 L120 120 Z" fill="currentColor" opacity="0.25"/>
               
-              {/* Progress bars */}
-              <rect x="65" y="20" width="25" height="2" rx="1" fill="currentColor" opacity="0.25"/>
-              <rect x="65" y="20" width="18" height="2" rx="1" fill="currentColor" opacity="0.4"/>
+              {/* Progress bars - more prominent */}
+              <rect x="110" y="30" width="60" height="4" rx="2" fill="currentColor" opacity="0.35"/>
+              <rect x="110" y="30" width="42" height="4" rx="2" fill="currentColor" opacity="0.5"/>
               
-              <rect x="70" y="25" width="20" height="2" rx="1" fill="currentColor" opacity="0.2"/>
-              <rect x="70" y="25" width="12" height="2" rx="1" fill="currentColor" opacity="0.35"/>
+              <rect x="120" y="40" width="50" height="4" rx="2" fill="currentColor" opacity="0.3"/>
+              <rect x="120" y="40" width="32" height="4" rx="2" fill="currentColor" opacity="0.45"/>
               
-              <rect x="75" y="30" width="15" height="2" rx="1" fill="currentColor" opacity="0.25"/>
-              <rect x="75" y="30" width="9" height="2" rx="1" fill="currentColor" opacity="0.4"/>
+              <rect x="130" y="50" width="40" height="4" rx="2" fill="currentColor" opacity="0.35"/>
+              <rect x="130" y="50" width="24" height="4" rx="2" fill="currentColor" opacity="0.5"/>
               
-              {/* Dots indicating progress */}
-              <circle cx="68" cy="35" r="1.5" fill="currentColor" opacity="0.3"/>
-              <circle cx="74" cy="37" r="1" fill="currentColor" opacity="0.4"/>
-              <circle cx="80" cy="35" r="1.2" fill="currentColor" opacity="0.25"/>
-              <circle cx="85" cy="38" r="0.8" fill="currentColor" opacity="0.35"/>
+              {/* Progress dots - larger */}
+              <circle cx="125" cy="60" r="3" fill="currentColor" opacity="0.4"/>
+              <circle cx="145" cy="65" r="2.5" fill="currentColor" opacity="0.5"/>
+              <circle cx="165" cy="60" r="3" fill="currentColor" opacity="0.35"/>
+              <circle cx="185" cy="65" r="2" fill="currentColor" opacity="0.45"/>
+              
+              {/* Activity indicators */}
+              <circle cx="140" cy="25" r="2" fill="currentColor" opacity="0.4">
+                <animate attributeName="opacity" values="0.2;0.6;0.2" dur="2s" repeatCount="indefinite"/>
+              </circle>
+              <circle cx="160" cy="22" r="1.5" fill="currentColor" opacity="0.3">
+                <animate attributeName="opacity" values="0.1;0.5;0.1" dur="1.5s" repeatCount="indefinite"/>
+              </circle>
             </svg>
           </div>
         );
