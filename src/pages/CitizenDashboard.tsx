@@ -58,7 +58,87 @@ export function CitizenDashboard() {
 
   return (
     <DashboardShell title="" subtitle="">
-      <div className="space-y-8">
+      {/* Falling Purple Autumn Flowers Animation */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {Array.from({ length: 15 }, (_, i) => (
+          <div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${12 + Math.random() * 6}s`,
+              animationIterationCount: 'infinite',
+              animationName: 'fallAndSway',
+              animationTimingFunction: 'ease-in-out'
+            }}
+          >
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              className="text-purple-300 opacity-70"
+              style={{
+                transform: `rotate(${Math.random() * 360}deg)`,
+                filter: 'drop-shadow(0 2px 4px rgba(147, 51, 234, 0.3))',
+                animation: `gentleSway ${4 + Math.random() * 2}s ease-in-out infinite alternate`
+              }}
+            >
+              {/* Beautiful purple autumn flower (sakura-style) */}
+              <g fill="currentColor">
+                {/* 5 petals arranged in a circle */}
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.9" transform="rotate(0 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.8" transform="rotate(72 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.95" transform="rotate(144 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.75" transform="rotate(216 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.85" transform="rotate(288 12 12)"/>
+                
+                {/* Flower center with gradient effect */}
+                <circle cx="12" cy="12" r="2.5" fill="#fbbf24" opacity="0.9"/>
+                <circle cx="12" cy="12" r="1.5" fill="#f59e0b" opacity="0.8"/>
+                <circle cx="12" cy="12" r="0.8" fill="#d97706" opacity="0.9"/>
+                
+                {/* Small highlight for realism */}
+                <circle cx="11.5" cy="11.5" r="0.4" fill="white" opacity="0.6"/>
+              </g>
+            </svg>
+          </div>
+        ))}
+        
+        {/* Additional smaller petals for depth */}
+        {Array.from({ length: 8 }, (_, i) => (
+          <div
+            key={`petal-${i}`}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 15}s`,
+              animationDuration: `${15 + Math.random() * 8}s`,
+              animationIterationCount: 'infinite',
+              animationName: 'fallAndSway',
+              animationTimingFunction: 'ease-in-out'
+            }}
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              className="text-pink-300 opacity-50"
+              style={{
+                transform: `rotate(${Math.random() * 360}deg)`,
+                filter: 'drop-shadow(0 1px 2px rgba(219, 39, 119, 0.2))',
+                animation: `petalRotate ${8 + Math.random() * 4}s linear infinite`
+              }}
+            >
+              {/* Single falling petal */}
+              <ellipse cx="8" cy="8" rx="2" ry="6" fill="currentColor" opacity="0.8"/>
+              <ellipse cx="8" cy="8" rx="1" ry="4" fill="#ec4899" opacity="0.6"/>
+            </svg>
+          </div>
+        ))}
+      </div>
+
+      <div className="relative z-10 space-y-8">
         {/* Hero Section with Japanese Greeting - Enhanced */}
         <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-pink-100/80 via-purple-50/60 to-blue-50/40 p-8 lg:p-12 border border-white/50 shadow-lg">
           {/* Enhanced Japanese Cultural Background */}
