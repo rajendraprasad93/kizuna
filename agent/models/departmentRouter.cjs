@@ -225,8 +225,15 @@ class DepartmentRouter {
     return [recs];
   }
   async routeProblem(report, rca, recs = [], status = {}) {
-    let type = (report?.category || "other").toLowerCase(),
-      sev = (report?.severity || "medium").toLowerCase();
+    let categoryValue = report?.category;
+    // Handle category as object or string
+    if (typeof categoryValue === 'object' && categoryValue?.name) {
+      categoryValue = categoryValue.name;
+    } else if (typeof categoryValue === 'object' && categoryValue?.display_name) {
+      categoryValue = categoryValue.display_name;
+    }
+    let type = (categoryValue || "other").toString().toLowerCase(),
+      sev = (report?.severity || "medium").toString().toLowerCase();
     let normalized = this.normalizeRecommendations(recs);
     let ids = new Set(this.map[type] || []);
     if (sev === "emergency") ids.add("emergency");
