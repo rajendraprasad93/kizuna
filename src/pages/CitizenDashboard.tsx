@@ -427,46 +427,150 @@ function KizunaStatCard({ icon: Icon, label, value, subtext, color, bgColor, ico
       textColor: 'text-blue-700',
       iconBg: 'bg-blue-500',
       accent: 'text-blue-400',
-      dot: 'bg-blue-400'
+      dot: 'bg-blue-400',
+      pattern: 'text-blue-200'
     },
     purple: {
       textColor: 'text-purple-700',
       iconBg: 'bg-purple-500',
       accent: 'text-purple-400',
-      dot: 'bg-purple-400'
+      dot: 'bg-purple-400',
+      pattern: 'text-purple-200'
     },
     orange: {
       textColor: 'text-orange-700',
       iconBg: 'bg-orange-500',
       accent: 'text-orange-400',
-      dot: 'bg-orange-400'
+      dot: 'bg-orange-400',
+      pattern: 'text-orange-200'
     },
     green: {
       textColor: 'text-emerald-700',
       iconBg: 'bg-emerald-500',
       accent: 'text-emerald-400',
-      dot: 'bg-emerald-400'
+      dot: 'bg-emerald-400',
+      pattern: 'text-emerald-200'
     },
   };
 
   const config = colorConfig[color as keyof typeof colorConfig] || colorConfig.blue;
 
+  // Specific decorative patterns for each card type (matching inspiration)
+  const getCardDecoration = () => {
+    switch (color) {
+      case 'blue': // 総レポート数 - Geometric lines pattern
+        return (
+          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-15 overflow-hidden">
+            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
+              {/* Geometric lines pattern */}
+              <defs>
+                <pattern id="lines-blue" patternUnits="userSpaceOnUse" width="20" height="20">
+                  <path d="M0 10 L20 10" stroke="currentColor" strokeWidth="1"/>
+                  <path d="M0 5 L15 5" stroke="currentColor" strokeWidth="0.5"/>
+                  <path d="M0 15 L15 15" stroke="currentColor" strokeWidth="0.5"/>
+                </pattern>
+              </defs>
+              <rect width="100" height="60" fill="url(#lines-blue)"/>
+              <circle cx="80" cy="45" r="8" fill="currentColor" opacity="0.3"/>
+              <circle cx="70" cy="35" r="6" fill="currentColor" opacity="0.2"/>
+              <circle cx="85" cy="25" r="4" fill="currentColor" opacity="0.25"/>
+            </svg>
+          </div>
+        );
+      
+      case 'purple': // 処理中 - Sparkle/star pattern
+        return (
+          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-20 overflow-hidden">
+            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
+              {/* Sparkle/diamond pattern */}
+              <path d="M70 40 L75 35 L80 40 L75 45 Z" fill="currentColor" opacity="0.4"/>
+              <path d="M85 25 L88 22 L91 25 L88 28 Z" fill="currentColor" opacity="0.3"/>
+              <path d="M65 20 L68 17 L71 20 L68 23 Z" fill="currentColor" opacity="0.35"/>
+              <path d="M80 50 L82 48 L84 50 L82 52 Z" fill="currentColor" opacity="0.25"/>
+              
+              {/* Dotted pattern */}
+              <circle cx="75" cy="15" r="2" fill="currentColor" opacity="0.2"/>
+              <circle cx="90" cy="35" r="1.5" fill="currentColor" opacity="0.25"/>
+              <circle cx="60" cy="45" r="1" fill="currentColor" opacity="0.3"/>
+              <circle cx="85" cy="45" r="1" fill="currentColor" opacity="0.2"/>
+              
+              {/* Grid lines */}
+              <defs>
+                <pattern id="grid-purple" patternUnits="userSpaceOnUse" width="8" height="8">
+                  <path d="M8 0 L0 0 0 8" fill="none" stroke="currentColor" strokeWidth="0.3" opacity="0.4"/>
+                </pattern>
+              </defs>
+              <rect x="60" y="10" width="40" height="50" fill="url(#grid-purple)"/>
+            </svg>
+          </div>
+        );
+      
+      case 'green': // 解決済み - City skyline pattern
+        return (
+          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-15 overflow-hidden">
+            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
+              {/* City skyline silhouette */}
+              <rect x="65" y="35" width="8" height="25" fill="currentColor" opacity="0.4"/>
+              <rect x="75" y="25" width="6" height="35" fill="currentColor" opacity="0.35"/>
+              <rect x="82" y="30" width="7" height="30" fill="currentColor" opacity="0.3"/>
+              <rect x="90" y="20" width="5" height="40" fill="currentColor" opacity="0.25"/>
+              <rect x="96" y="28" width="4" height="32" fill="currentColor" opacity="0.2"/>
+              
+              {/* Windows */}
+              <rect x="67" y="38" width="1" height="1" fill="white" opacity="0.6"/>
+              <rect x="69" y="40" width="1" height="1" fill="white" opacity="0.5"/>
+              <rect x="67" y="45" width="1" height="1" fill="white" opacity="0.4"/>
+              <rect x="77" y="28" width="1" height="1" fill="white" opacity="0.5"/>
+              <rect x="77" y="33" width="1" height="1" fill="white" opacity="0.4"/>
+              <rect x="84" y="35" width="1" height="1" fill="white" opacity="0.3"/>
+              <rect x="86" y="38" width="1" height="1" fill="white" opacity="0.4"/>
+              
+              {/* Clouds */}
+              <ellipse cx="80" cy="15" rx="6" ry="3" fill="currentColor" opacity="0.2"/>
+              <ellipse cx="90" cy="12" rx="4" ry="2" fill="currentColor" opacity="0.15"/>
+            </svg>
+          </div>
+        );
+      
+      case 'orange': // 対応中 - Wave/progress pattern
+        return (
+          <div className="absolute bottom-0 right-0 w-32 h-20 opacity-18 overflow-hidden">
+            <svg viewBox="0 0 100 60" className={`w-full h-full ${config.pattern}`}>
+              {/* Wave patterns */}
+              <path d="M60 40 Q70 35 80 40 Q90 45 100 40 L100 60 L60 60 Z" fill="currentColor" opacity="0.3"/>
+              <path d="M65 50 Q75 45 85 50 Q95 55 100 50 L100 60 L65 60 Z" fill="currentColor" opacity="0.2"/>
+              
+              {/* Progress bars */}
+              <rect x="65" y="20" width="25" height="2" rx="1" fill="currentColor" opacity="0.25"/>
+              <rect x="65" y="20" width="18" height="2" rx="1" fill="currentColor" opacity="0.4"/>
+              
+              <rect x="70" y="25" width="20" height="2" rx="1" fill="currentColor" opacity="0.2"/>
+              <rect x="70" y="25" width="12" height="2" rx="1" fill="currentColor" opacity="0.35"/>
+              
+              <rect x="75" y="30" width="15" height="2" rx="1" fill="currentColor" opacity="0.25"/>
+              <rect x="75" y="30" width="9" height="2" rx="1" fill="currentColor" opacity="0.4"/>
+              
+              {/* Dots indicating progress */}
+              <circle cx="68" cy="35" r="1.5" fill="currentColor" opacity="0.3"/>
+              <circle cx="74" cy="37" r="1" fill="currentColor" opacity="0.4"/>
+              <circle cx="80" cy="35" r="1.2" fill="currentColor" opacity="0.25"/>
+              <circle cx="85" cy="38" r="0.8" fill="currentColor" opacity="0.35"/>
+            </svg>
+          </div>
+        );
+      
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className={`relative ${bgColor} rounded-3xl p-8 border border-white/50 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group overflow-hidden`}>
-      {/* Subtle background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <svg viewBox="0 0 100 100" className={`w-full h-full ${config.accent}`}>
-          <defs>
-            <pattern id={`pattern-${color}`} patternUnits="userSpaceOnUse" width="20" height="20">
-              <circle cx="10" cy="10" r="8" fill="none" stroke="currentColor" strokeWidth="0.5"/>
-            </pattern>
-          </defs>
-          <rect width="100" height="100" fill={`url(#pattern-${color})`}/>
-        </svg>
-      </div>
+      {/* Card-specific decorative pattern */}
+      {getCardDecoration()}
 
       {/* Main content */}
-      <div className="relative">
+      <div className="relative z-10">
         {/* Icon */}
         <div className={`w-14 h-14 rounded-2xl ${config.iconBg} flex items-center justify-center mb-6 shadow-lg group-hover:scale-105 transition-transform`}>
           <Icon className="h-7 w-7 text-white" />
