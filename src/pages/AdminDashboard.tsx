@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Loader2, FileText, Users, Building2, Brain, TrendingUp, CheckCircle2, Activity, BarChart3 } from 'lucide-react';
+import { Loader2, FileText, Users, Building2, Brain, TrendingUp, CheckCircle2, Activity, BarChart3, Crown, Shield } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useLanguage } from '@/context/LanguageContext';
+import { useAuth } from '@/context/AuthContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
@@ -17,6 +18,7 @@ export function AdminDashboard() {
   const [analyses, setAnalyses] = useState<AiAnalysis[]>([]);
   const [loading, setLoading] = useState(true);
   const { t } = useLanguage();
+  const { profile } = useAuth();
 
   useEffect(() => {
     async function load() {
@@ -66,12 +68,12 @@ export function AdminDashboard() {
   }));
 
   const byStatus = [
-    { label: 'Submitted', count: reports.filter((r) => r.status === 'submitted').length, color: 'bg-slate-400' },
-    { label: 'Analyzing', count: reports.filter((r) => r.status === 'analyzing').length, color: 'bg-amber-400' },
-    { label: 'Analyzed', count: reports.filter((r) => r.status === 'analyzed').length, color: 'bg-blue-400' },
-    { label: 'Assigned', count: reports.filter((r) => r.status === 'assigned').length, color: 'bg-blue-500' },
-    { label: 'In Progress', count: reports.filter((r) => r.status === 'in_progress').length, color: 'bg-orange-400' },
-    { label: 'Resolved', count: reports.filter((r) => r.status === 'resolved').length, color: 'bg-emerald-500' },
+    { label: '提出済み', count: reports.filter((r) => r.status === 'submitted').length, color: 'bg-slate-400' },
+    { label: '分析中', count: reports.filter((r) => r.status === 'analyzing').length, color: 'bg-amber-400' },
+    { label: '分析済み', count: reports.filter((r) => r.status === 'analyzed').length, color: 'bg-blue-400' },
+    { label: '割当済み', count: reports.filter((r) => r.status === 'assigned').length, color: 'bg-blue-500' },
+    { label: '対応中', count: reports.filter((r) => r.status === 'in_progress').length, color: 'bg-orange-400' },
+    { label: '解決済み', count: reports.filter((r) => r.status === 'resolved').length, color: 'bg-emerald-500' },
   ];
 
   const recentReports = reports.slice(0, 5);
@@ -81,13 +83,174 @@ export function AdminDashboard() {
     admins: users.filter((u) => u.role === 'admin').length,
   };
 
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 12 ? 'おはようございます' : currentHour < 18 ? 'こんにちは' : 'こんばんは';
+
   if (loading) {
-    return <DashboardShell title={t('overview')}><div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-brand-500" /></div></DashboardShell>;
+    return (
+      <DashboardShell title="">
+        <div className="flex justify-center py-20">
+          <Loader2 className="h-8 w-8 animate-spin text-purple-500" />
+        </div>
+      </DashboardShell>
+    );
   }
 
   return (
-    <DashboardShell title={t('overview')} subtitle="System-wide analytics and metrics">
-      <div className="space-y-6">
+    <DashboardShell title="" subtitle="">
+      {/* Falling Purple Autumn Flowers Animation */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {Array.from({ length: 15 }, (_, i) => (
+          <div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 10}s`,
+              animationDuration: `${12 + Math.random() * 6}s`,
+              animationIterationCount: 'infinite',
+              animationName: 'fallAndSway',
+              animationTimingFunction: 'ease-in-out'
+            }}
+          >
+            <svg 
+              width="24" 
+              height="24" 
+              viewBox="0 0 24 24" 
+              className="text-purple-300 opacity-70"
+              style={{
+                transform: `rotate(${Math.random() * 360}deg)`,
+                filter: 'drop-shadow(0 2px 4px rgba(147, 51, 234, 0.3))',
+                animation: `gentleSway ${4 + Math.random() * 2}s ease-in-out infinite alternate`
+              }}
+            >
+              {/* Beautiful purple autumn flower (sakura-style) */}
+              <g fill="currentColor">
+                {/* 5 petals arranged in a circle */}
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.9" transform="rotate(0 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.8" transform="rotate(72 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.95" transform="rotate(144 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.75" transform="rotate(216 12 12)"/>
+                <ellipse cx="12" cy="7" rx="3.5" ry="7" opacity="0.85" transform="rotate(288 12 12)"/>
+                
+                {/* Flower center with gradient effect */}
+                <circle cx="12" cy="12" r="2.5" fill="#fbbf24" opacity="0.9"/>
+                <circle cx="12" cy="12" r="1.5" fill="#f59e0b" opacity="0.8"/>
+                <circle cx="12" cy="12" r="0.8" fill="#d97706" opacity="0.9"/>
+                
+                {/* Small highlight for realism */}
+                <circle cx="11.5" cy="11.5" r="0.4" fill="white" opacity="0.6"/>
+              </g>
+            </svg>
+          </div>
+        ))}
+        
+        {/* Additional smaller petals for depth */}
+        {Array.from({ length: 8 }, (_, i) => (
+          <div
+            key={`petal-${i}`}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 15}s`,
+              animationDuration: `${15 + Math.random() * 8}s`,
+              animationIterationCount: 'infinite',
+              animationName: 'fallAndSway',
+              animationTimingFunction: 'ease-in-out'
+            }}
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 16 16" 
+              className="text-pink-300 opacity-50"
+              style={{
+                transform: `rotate(${Math.random() * 360}deg)`,
+                filter: 'drop-shadow(0 1px 2px rgba(219, 39, 119, 0.2))',
+                animation: `petalRotate ${8 + Math.random() * 4}s linear infinite`
+              }}
+            >
+              {/* Single falling petal */}
+              <ellipse cx="8" cy="8" rx="2" ry="6" fill="currentColor" opacity="0.8"/>
+              <ellipse cx="8" cy="8" rx="1" ry="4" fill="#ec4899" opacity="0.6"/>
+            </svg>
+          </div>
+        ))}
+      </div>
+
+      <div className="relative z-10 space-y-8">
+        {/* Enhanced Admin Hero Section */}
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-violet-100/80 via-purple-50/60 to-indigo-50/40 p-8 lg:p-12 border border-white/50 shadow-lg">
+          {/* Japanese Cultural Background for Admin */}
+          <div className="absolute inset-0">
+            {/* Imperial castle silhouette */}
+            <div className="absolute top-0 right-0 w-80 h-40 opacity-8">
+              <svg viewBox="0 0 240 100" className="w-full h-full text-violet-400">
+                {/* Main castle structure */}
+                <rect x="60" y="40" width="120" height="60" fill="currentColor"/>
+                <polygon points="60,40 120,15 180,40" fill="currentColor"/>
+                
+                {/* Castle towers */}
+                <rect x="40" y="50" width="20" height="50" fill="currentColor"/>
+                <rect x="180" y="50" width="20" height="50" fill="currentColor"/>
+                <polygon points="40,50 50,35 60,50" fill="currentColor"/>
+                <polygon points="180,50 190,35 200,50" fill="currentColor"/>
+                
+                {/* Central tower */}
+                <rect x="110" y="20" width="20" height="80" fill="currentColor"/>
+                <polygon points="110,20 120,5 130,20" fill="currentColor"/>
+                
+                {/* Windows and details */}
+                <rect x="70" y="55" width="6" height="8" fill="white" opacity="0.7"/>
+                <rect x="85" y="55" width="6" height="8" fill="white" opacity="0.8"/>
+                <rect x="100" y="55" width="6" height="8" fill="white" opacity="0.6"/>
+                <rect x="115" y="35" width="4" height="6" fill="white" opacity="0.9"/>
+              </svg>
+            </div>
+            
+            {/* Traditional Japanese imperial pattern */}
+            <div className="absolute bottom-0 left-8 w-48 h-24 opacity-6">
+              <svg viewBox="0 0 150 75" className="w-full h-full text-indigo-300">
+                {/* Chrysanthemum imperial symbol pattern */}
+                <g transform="translate(75, 37.5)">
+                  <circle r="20" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.8"/>
+                  {Array.from({ length: 16 }).map((_, i) => (
+                    <path key={i} d="M0,0 L0,-18" stroke="currentColor" strokeWidth="0.8" opacity="0.6" transform={`rotate(${i * 22.5})`}/>
+                  ))}
+                  <circle r="8" fill="currentColor" opacity="0.4"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          
+          <div className="relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8">
+            <div className="flex-1 max-w-2xl">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="text-4xl">👑</div>
+                <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                  {greeting}、<span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">{profile?.full_name?.split(' ')[0]}</span> 様
+                </h1>
+              </div>
+              <p className="text-slate-600 text-xl mb-4 flex items-center gap-3 leading-relaxed">
+                <Crown className="h-6 w-6 text-violet-500" />
+                <span className="font-semibold text-violet-700">システム管理者</span>
+              </p>
+              <p className="text-slate-600 text-lg mb-8 flex items-center gap-3 leading-relaxed">
+                <span className="text-2xl">🌸</span>
+                <span>全システムの状況とAI分析を統括管理できます。</span>
+              </p>
+            </div>
+            
+            {/* Admin imperial circle with crown */}
+            <div className="hidden lg:flex items-center justify-center w-40 h-40 opacity-15">
+              <svg viewBox="0 0 120 120" className="w-full h-full text-violet-600">
+                <circle cx="60" cy="60" r="55" fill="none" stroke="currentColor" strokeWidth="2"/>
+                <circle cx="60" cy="60" r="45" fill="none" stroke="currentColor" strokeWidth="1" opacity="0.5"/>
+                <Crown className="absolute inset-0 w-12 h-12 text-current" style={{ left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}/>
+              </svg>
+            </div>
+          </div>
+        </div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard icon={FileText} label={t('totalReports')} value={stats.totalReports} color="blue" />
           <StatCard icon={Users} label={t('totalUsers')} value={stats.totalUsers} color="emerald" />
