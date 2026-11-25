@@ -3,13 +3,14 @@ import { Link } from 'react-router-dom';
 import { Plus, FileText, Clock, CheckCircle2, AlertCircle, TrendingUp, MapPin, Brain, Eye, GitBranch, Target, Network, Cpu } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
-import { useLanguage } from '@/context/LanguageContext';
+import { useLanguage, convertNameToJapanese } from '@/context/LanguageContext';
 import { DashboardShell } from '@/components/DashboardShell';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { StatusBadge, Badge } from '@/components/ui/Badge';
 import { MapView } from '@/components/MapView';
 import type { Report, ProblemCategory } from '@/types';
+import { resolveImageSrc } from '@/lib/imageUtils';
 
 export function CitizenDashboard() {
   const { profile } = useAuth();
@@ -197,8 +198,10 @@ export function CitizenDashboard() {
             <div className="flex-1 max-w-2xl">
               <div className="flex items-center gap-4 mb-6">
                 <div className="text-4xl">👋</div>
-                <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
-                  {greeting}、<span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{profile?.full_name?.split(' ')[0]}</span> さん
+                <h1 className="text-3xl lg:text-4xl font-bold text-slate-900 leading-tight">
+                  {greeting}、<span className="bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+                    {convertNameToJapanese(profile?.full_name?.split(' ')[0] || '')}
+                  </span>さん
                 </h1>
               </div>
               <p className="text-slate-600 text-xl mb-8 flex items-center gap-3 leading-relaxed">
@@ -392,9 +395,10 @@ export function CitizenDashboard() {
                         </div>
                         {report.image_urls && report.image_urls.length > 0 && (
                           <img
-                            src={report.image_urls[0]}
+                            src={resolveImageSrc(report.image_urls[0]) ?? undefined}
                             alt=""
                             className="w-20 h-20 rounded-xl object-cover flex-shrink-0 shadow-sm"
+                            onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                           />
                         )}
                       </div>

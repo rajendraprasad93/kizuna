@@ -1,7 +1,7 @@
 import type { Profile, Department, ProblemCategory, Report, ActionTaken, Notification, UserRole } from '@/types';
 import type { AnalysisResult } from '@/lib/ai-engine';
 
-const API_BASE = '/api';
+const API_BASE = 'http://localhost:5000/api';
 
 function getToken(): string | null {
   return localStorage.getItem('civiceye_token');

@@ -2,6 +2,24 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 
 export type Language = 'en' | 'ja';
 
+// Helper function to convert common English names to Japanese Katakana
+function convertNameToJapanese(name: string): string {
+  const nameConversions: Record<string, string> = {
+    'raj': 'ラジ',
+    'john': 'ジョン',
+    'mike': 'マイク',
+    'david': 'デビッド',
+    'sarah': 'サラ',
+    'mary': 'メアリー',
+    'alex': 'アレックス',
+    'chris': 'クリス',
+    'anna': 'アンナ',
+    'kate': 'ケイト'
+  };
+  
+  return nameConversions[name?.toLowerCase()] || name;
+}
+
 const translations = {
   en: {
     // Nav
@@ -536,3 +554,5 @@ export function useLanguage() {
   if (!ctx) throw new Error('useLanguage must be used within LanguageProvider');
   return ctx;
 }
+
+export { convertNameToJapanese };

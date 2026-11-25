@@ -9,6 +9,8 @@ import departmentsRoutes from "./routes/departments.js";
 import actionsRoutes from "./routes/actions.js";
 import notificationsRoutes from "./routes/notifications.js";
 import adminRoutes from "./routes/admin.js";
+import imagesRoutes from "./routes/images.js";
+import { verifyConnection, isConfigured } from "./services/azureStorageService.js";
 
 dotenv.config();
 
@@ -27,6 +29,7 @@ app.use("/api/departments", departmentsRoutes);
 app.use("/api/actions", actionsRoutes);
 app.use("/api/notifications", notificationsRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/images", imagesRoutes);
 
 // Health check & DB connection status endpoint
 app.get("/api/health", async (req, res) => {
@@ -56,14 +59,36 @@ app.use((err, req, res, _next) => {
 async function start() {
   try {
     await initDb();
+
+    // Verify Azure Blob Storage connection
+    if (isConfigured()) {
+      const azureStatus = await verifyConnection();
+      if (azureStatus.ok) {
+        console.log(
+          `✅ Azure Blob Storage connected — account: ${azureStatus.account}, container: ${azureStatus.container}`
+        );
+      } else {
+        console.warn(
+          `⚠️  Azure Blob Storage connection failed: ${azureStatus.error}`
+        );
+        console.warn(
+          "   Image uploads will fail. Run `az login` and ensure Storage Blob Data Contributor role is assigned."
+        );
+      }
+    } else {
+      console.warn(
+        "⚠️  Azure Blob Storage not configured — set AZURE_STORAGE_ACCOUNT_NAME and AZURE_STORAGE_CONTAINER_NAME in .env"
+      );
+    }
+
     app.listen(PORT, () => {
       console.log(
-        `🚀 CivicEye PostgreSQL Backend running at http://localhost:${PORT}`,
+        `🚀 CivicEye PostgreSQL Backend running at http://localhost:${PORT}`
       );
     });
   } catch {
     console.error(
-      "❌ Backend startup aborted because the database is unavailable.",
+      "❌ Backend startup aborted because the database is unavailable."
     );
     process.exitCode = 1;
   }
