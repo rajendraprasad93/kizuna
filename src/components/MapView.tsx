@@ -30,24 +30,28 @@ const statusOpacity: Record<string, number> = {
   closed: 0.3,
 };
 
-export function MapView({ reports, categories, onSelect, selectedId, height = '400px', centerLat = 13.0827, centerLng = 80.2707, zoom = 12 }: MapViewProps) {
+export function MapView({ reports = [], categories = [], onSelect, selectedId, height = '400px', centerLat = 13.0827, centerLng = 80.2707, zoom = 12 }: MapViewProps) {
   const categoryColorMap = useMemo(() => {
     const map: Record<string, string> = {};
-    categories.forEach((c) => { map[c.id] = colorMap[c.color] || '#3285fc'; });
+    if (categories && Array.isArray(categories)) {
+      categories.forEach((c) => { map[c.id] = colorMap[c.color] || '#3285fc'; });
+    }
     return map;
   }, [categories]);
 
   const bounds = useMemo(() => {
-    if (reports.length === 0) {
+    if (!reports || reports.length === 0) {
       const d = 0.05;
       return { minLat: centerLat - d, maxLat: centerLat + d, minLng: centerLng - d, maxLng: centerLng + d };
     }
     let minLat = Infinity, maxLat = -Infinity, minLng = Infinity, maxLng = -Infinity;
     reports.forEach((r) => {
-      minLat = Math.min(minLat, r.latitude);
-      maxLat = Math.max(maxLat, r.latitude);
-      minLng = Math.min(minLng, r.longitude);
-      maxLng = Math.max(maxLng, r.longitude);
+      if (r.latitude && r.longitude) {
+        minLat = Math.min(minLat, r.latitude);
+        maxLat = Math.max(maxLat, r.latitude);
+        minLng = Math.min(minLng, r.longitude);
+        maxLng = Math.max(maxLng, r.longitude);
+      }
     });
     const pad = 0.01;
     return { minLat: minLat - pad, maxLat: maxLat + pad, minLng: minLng - pad, maxLng: maxLng + pad };

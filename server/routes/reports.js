@@ -7,6 +7,13 @@ import {
   canonicalDepartmentName,
   validateReportCoordinates,
 } from "../departmentMap.js";
+import {
+  uploadImage,
+  uploadBuffer,
+  downloadImageStream,
+  deleteBlob,
+  isConfigured as azureIsConfigured,
+} from "../services/azureStorageService.js";
 
 const router = express.Router();
 
@@ -122,7 +129,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 
     const report = reportRes.rows[0];
 
-    // Fetch AI Analysis
+    // Fetch AI Analysis (simplified for now)
     const aiRes = await pool.query(
       "SELECT * FROM ai_analyses WHERE report_id = $1",
       [id],
@@ -142,6 +149,7 @@ router.get("/:id", authenticateToken, async (req, res) => {
 
     return res.json(report);
   } catch (err) {
+    console.error('Report fetch error:', err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -157,6 +165,8 @@ router.post("/", authenticateToken, async (req, res) => {
       longitude,
       location_address,
       image_urls = [],
+      imageBase64,
+      mimeType,
       ai_analysis,
       priority = 3,
       department_id,
@@ -165,6 +175,44 @@ router.post("/", authenticateToken, async (req, res) => {
     const coordError = validateReportCoordinates(req.body);
     if (coordError) {
       return res.status(400).json({ error: coordError });
+    }
+
+    // ── Azure Blob Storage: upload image before saving report ─────────────────
+    // The frontend sends image_urls as an array containing the full data URI
+    // e.g. ["data:image/jpeg;base64,/9j/4AAQ..."]
+    // Extract base64 from whatever form the image arrives in.
+    let finalImageUrls = [];
+    let extractedBase64 = imageBase64 || null;
+    let extractedMime = mimeType || "image/jpeg";
+
+    if (!extractedBase64 && Array.isArray(image_urls) && image_urls.length > 0) {
+      const first = image_urls[0];
+      if (typeof first === "string" && first.startsWith("data:")) {
+        const match = first.match(/^data:([^;]+);base64,(.+)$/);
+        if (match) {
+          extractedMime = match[1];
+          extractedBase64 = match[2];
+        }
+      } else if (typeof first === "string" && first.length > 500) {
+        // Raw base64 without prefix
+        extractedBase64 = first;
+      }
+    }
+
+    if (extractedBase64 && azureIsConfigured()) {
+      try {
+        const tempId = `temp-${Date.now()}`;
+        const uploaded = await uploadImage(extractedBase64, tempId, extractedMime);
+        finalImageUrls = [{ blobName: uploaded.blobName, url: uploaded.url }];
+        console.log(`📤 Report image uploaded to Azure: ${uploaded.blobName}`);
+      } catch (uploadErr) {
+        console.error("⚠️  Azure image upload failed:", uploadErr.message);
+        console.warn("   Report will be saved without cloud image storage.");
+        // Keep original image_urls as fallback so report still saves
+        finalImageUrls = image_urls || [];
+      }
+    } else {
+      finalImageUrls = image_urls || [];
     }
 
     const insertReport = await pool.query(
@@ -182,7 +230,7 @@ router.post("/", authenticateToken, async (req, res) => {
         latitude,
         longitude,
         location_address || null,
-        JSON.stringify(image_urls),
+        JSON.stringify(finalImageUrls),
         priority,
         department_id || null,
         ai_analysis ? "analyzed" : "submitted",
@@ -190,6 +238,31 @@ router.post("/", authenticateToken, async (req, res) => {
     );
 
     const report = insertReport.rows[0];
+
+    // ── Rename temp blob to use real report ID ────────────────────────────────
+    if (
+      finalImageUrls.length > 0 &&
+      finalImageUrls[0]?.blobName?.startsWith("reports/temp-") &&
+      extractedBase64
+    ) {
+      try {
+        const oldBlobName = finalImageUrls[0].blobName;
+        const ext = oldBlobName.split(".").pop();
+        const newBlobName = `reports/${report.id}/${Date.now()}.${ext}`;
+        const buffer = Buffer.from(extractedBase64, "base64");
+        const reUploaded = await uploadBuffer(buffer, newBlobName, extractedMime);
+        await deleteBlob(oldBlobName);
+        finalImageUrls = [{ blobName: reUploaded.blobName, url: reUploaded.url }];
+        await pool.query(
+          `UPDATE reports SET image_urls = $1, updated_at = now() WHERE id = $2`,
+          [JSON.stringify(finalImageUrls), report.id]
+        );
+        report.image_urls = JSON.stringify(finalImageUrls);
+        console.log(`🔁 Blob renamed to: ${newBlobName}`);
+      } catch (renameErr) {
+        console.warn("⚠️  Blob rename failed:", renameErr.message);
+      }
+    }
     let pt = {
       primary: "other",
       confidence: 0.5,
@@ -250,7 +323,7 @@ router.post("/", authenticateToken, async (req, res) => {
           JSON.stringify(rci),
           ia[0]?.action || "Review by department official",
           ia[0]?.priority ? 1 - ia[0].priority / 5 : 0.8,
-          JSON.stringify(ia.slice(1)),
+          JSON.stringify(ia),
           mpd.suggested_priority || 3,
           JSON.stringify({
             tags: mpd.tags,

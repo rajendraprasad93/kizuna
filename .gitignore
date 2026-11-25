@@ -21,3 +21,8 @@ dist-ssr
 *.sln
 *.sw?
 .env
+
+# Test outputs and temporary files
+scripts/test-output.txt
+scripts/server-start-test.txt
+*.tsbuildinfo

@@ -2,6 +2,24 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 
 export type Language = 'en' | 'ja';
 
+// Helper function to convert common English names to Japanese Katakana
+function convertNameToJapanese(name: string): string {
+  const nameConversions: Record<string, string> = {
+    'raj': 'ラジ',
+    'john': 'ジョン',
+    'mike': 'マイク',
+    'david': 'デビッド',
+    'sarah': 'サラ',
+    'mary': 'メアリー',
+    'alex': 'アレックス',
+    'chris': 'クリス',
+    'anna': 'アンナ',
+    'kate': 'ケイト'
+  };
+  
+  return nameConversions[name?.toLowerCase()] || name;
+}
+
 const translations = {
   en: {
     // Nav
@@ -236,6 +254,19 @@ const translations = {
     reportsFiledCount: '1,523',
     aiAccuracyPercent: '94%',
     resolvedPercent: '72%',
+    
+    // Dashboard specific
+    goodMorning: 'Good morning',
+    processing: 'Processing',
+    aiAnalysisInProgress: 'AI analysis in progress',
+    analysisSteps: 'Analysis Steps',
+    duplicateCheck: 'Duplicate Check',
+    relationshipDiscoveryStep: 'Relationship Discovery',
+    causeAnalysisStep: 'Cause Analysis',
+    actionRecommendationStep: 'Action Recommendation',
+    departmentRouting: 'Department Routing',
+    areaStatus: 'Area Status',
+    helpSupport: 'Help & Support',
   },
 
   ja: {
@@ -471,6 +502,19 @@ const translations = {
     reportsFiledCount: '1,523',
     aiAccuracyPercent: '94%',
     resolvedPercent: '72%',
+    
+    // Dashboard specific
+    goodMorning: 'おはようございます',
+    processing: '処理中',
+    aiAnalysisInProgress: 'AIが問題を分析中',
+    analysisSteps: '分析ステップ',
+    duplicateCheck: '重複チェック',
+    relationshipDiscoveryStep: '関連性の発見',
+    causeAnalysisStep: '原因の分析',
+    actionRecommendationStep: '対応策の提案',
+    departmentRouting: '部局への送信',
+    areaStatus: 'エリアの状況',
+    helpSupport: 'ヘルプ＆サポート',
   },
 } as const;
 
@@ -486,7 +530,8 @@ const LanguageContext = createContext<LanguageContextValue | undefined>(undefine
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>(() => {
-    return (localStorage.getItem('civiceye-lang') as Language) || 'en';
+    // Default to Japanese for Kizuna
+    return (localStorage.getItem('civiceye-lang') as Language) || 'ja';
   });
 
   const handleSetLanguage = (lang: Language) => {
@@ -509,3 +554,5 @@ export function useLanguage() {
   if (!ctx) throw new Error('useLanguage must be used within LanguageProvider');
   return ctx;
 }
+
+export { convertNameToJapanese };

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { Select } from '@/components/ui/Input';
 import type { Report, ProblemCategory } from '@/types';
+import { resolveImageSrc } from '@/lib/imageUtils';
 
 export function AdminReportsPage() {
   const [reports, setReports] = useState<Report[]>([]);
@@ -85,7 +86,8 @@ export function AdminReportsPage() {
                       </div>
                     </div>
                     {report.image_urls && report.image_urls.length > 0 && (
-                      <img src={report.image_urls[0]} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                      <img src={resolveImageSrc(report.image_urls[0]) ?? undefined} alt="" className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                     )}
                   </div>
                 </Card>

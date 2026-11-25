@@ -793,6 +793,10 @@ class RootCauseAnalysisModel {
     // Generalized semantic adjustments based on cross-evidence reasoning
     const text = allEvidence.report || "";
     
+    // NEGATIVE EVIDENCE DETECTION
+    // Detect explicit negations and counterfactuals that contradict specific causes
+    score = this.applyNegativeEvidence(score, template, text, evidence);
+    
     // Storm + physical damage context should penalize network/operational faults
     if ((template.id === "network_overload_or_fault") &&
         text.includes("storm") && 
@@ -853,6 +857,72 @@ class RootCauseAnalysisModel {
         !text.includes("water") && !text.includes("wet")) {
       score -= 0.10; // Penalize water infrastructure when construction quality issue evident
       evidence.push("Penalized: construction quality context without water");
+    }
+    
+    return score;
+  }
+
+  applyNegativeEvidence(score, template, text, evidence) {
+    // Conservative negative evidence detection
+    // Only penalizes causes that are explicitly contradicted by citizen observations
+    
+    // Map cause types to their characteristic evidence
+    const causeSignatures = {
+      // Blockage-related causes
+      "blocked_drainage_system": ["garbage", "blockage", "blocked", "clogged", "obstruction", "debris"],
+      "inadequate_waste_management": ["garbage", "waste", "trash", "litter"],
+      
+      // Infrastructure causes remain unaffected by garbage negation
+      "inadequate_drainage_capacity": [],
+      "water_infrastructure_damage": [],
+      "poor_drainage_system": []
+    };
+    
+    const signatures = causeSignatures[template.id] || [];
+    if (signatures.length === 0) return score; // No negation applies to this cause
+    
+    // Detect explicit negations: "no X", "don't see X", "not X"
+    const negationPatterns = [
+      /\b(?:no|not|don't|dont|doesn't|doesnt)\s+(?:see\s+)?(?:any\s+)?(\w+)/gi,
+      /\b(?:i\s+)?(?:don't|dont)\s+see\s+(?:any\s+)?(\w+)/gi
+    ];
+    
+    for (const pattern of negationPatterns) {
+      const matches = [...text.matchAll(pattern)];
+      for (const match of matches) {
+        const negatedTerm = match[1]?.toLowerCase();
+        // Check if negated term relates to this cause's signature
+        if (signatures.some(sig => negatedTerm?.includes(sig) || sig.includes(negatedTerm))) {
+          score -= 0.15; // Moderate penalty for explicit negation
+          evidence.push(`Penalized: citizen reports no ${negatedTerm}`);
+          return score; // Only apply once per cause
+        }
+      }
+    }
+    
+    // Detect counterfactual/removal evidence: "after X removed, Y continues"
+    const counterfactualPatterns = [
+      /(?:after|even after|once|when)\s+(?:the\s+)?(\w+)\s+(?:is|was|has been|were)\s+(?:removed|cleared|cleaned)/gi,
+      /(?:despite|although)\s+(?:the\s+)?(\w+)\s+(?:removal|clearing|cleaning)/gi
+    ];
+    
+    for (const pattern of counterfactualPatterns) {
+      const matches = [...text.matchAll(pattern)];
+      for (const match of matches) {
+        const removedTerm = match[1]?.toLowerCase();
+        // Check if removed term relates to this cause's signature
+        if (signatures.some(sig => removedTerm?.includes(sig) || sig.includes(removedTerm))) {
+          // Check if problem persists after removal
+          const matchIndex = match.index || 0;
+          const textAfter = text.substring(matchIndex);
+          const persistenceIndicators = ["continues", "remain", "still", "persists", "water"];
+          if (persistenceIndicators.some(ind => textAfter.includes(ind))) {
+            score -= 0.18; // Strong penalty for counterfactual evidence
+            evidence.push(`Penalized: ${removedTerm} removed but problem persists`);
+            return score; // Only apply once per cause
+          }
+        }
+      }
     }
     
     return score;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, MapPin, Clock, User, Camera, Brain, Loader2, MessageSquare, Wrench, DollarSign, Timer } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -10,9 +10,12 @@ import { Button } from '@/components/ui/Button';
 import { Badge, StatusBadge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
 import { Input, Textarea, Select } from '@/components/ui/Input';
-import { AiAnalysisDisplay } from '@/components/AiAnalysisDisplay';
+import AiAnalysisDisplay from '@/components/AiAnalysisDisplay';
 import { MapView } from '@/components/MapView';
 import type { Report, ProblemCategory, AiAnalysis, ActionTaken, Profile, Department, ReportStatus, UserRole } from '@/types';
+import { resolveImageSrc } from '@/lib/imageUtils';
+
+
 
 export function ReportDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -102,16 +105,28 @@ export function ReportDetailPage() {
         </Link>
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Left: Report info + AI */}
-        <div className="lg:col-span-2 space-y-6">
+      <div className="space-y-8">
+        {/* Report Information Section - Grid Layout */}
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* Left: Report info */}
+          <div className="lg:col-span-2 space-y-6">
           {/* Images */}
           {report.image_urls && report.image_urls.length > 0 && (
             <Card className="p-0 overflow-hidden">
               <div className="grid grid-cols-1">
-                {report.image_urls.map((url, i) => (
-                  <img key={i} src={url} alt={`Report ${i + 1}`} className="w-full max-h-96 object-cover" />
-                ))}
+                {report.image_urls.map((entry, i) => {
+                  const src = resolveImageSrc(entry);
+                  if (!src) return null;
+                  return (
+                    <img
+                      key={i}
+                      src={src}
+                      alt={`Report ${i + 1}`}
+                      className="w-full max-h-96 object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  );
+                })}
               </div>
             </Card>
           )}
@@ -153,22 +168,55 @@ export function ReportDetailPage() {
               )}
             </div>
           </Card>
+        </div>
 
-          {/* AI Analysis */}
-          {analysis ? (
-            <AiAnalysisDisplay analysis={analysis} />
-          ) : (
-            <Card className="p-6">
-              <div className="flex items-center gap-2 mb-2">
-                <Brain className="h-5 w-5 text-slate-400" />
-                <h3 className="font-semibold text-slate-900">AI Analysis</h3>
+        {/* Right Sidebar */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Map */}
+          {(report.latitude && report.longitude) && (
+            <Card className="p-0 overflow-hidden">
+              <div className="h-64">
+                <MapView
+                  reports={[report]}
+                  categories={categories || []}
+                  centerLat={report.latitude}
+                  centerLng={report.longitude}
+                  zoom={15}
+                />
               </div>
-              <p className="text-sm text-slate-500">AI analysis has not been run on this report yet.</p>
             </Card>
           )}
 
-          {/* Actions Timeline */}
-          {actions.length > 0 && (
+          {/* Department Info */}
+          {department && (
+            <Card className="p-4">
+              <h3 className="font-semibold text-slate-900 mb-2">Assigned Department</h3>
+              <div className="text-sm text-slate-700">
+                {department.name}
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* AI Analysis - Full Width Section */}
+      <div className="w-full">
+        {analysis ? (
+          <AiAnalysisDisplay analysis={analysis} />
+        ) : (
+          <Card className="p-6">
+            <div className="flex items-center gap-2 mb-2">
+              <Brain className="h-5 w-5 text-slate-400" />
+              <h3 className="font-semibold text-slate-900">AI Analysis</h3>
+            </div>
+            <p className="text-sm text-slate-500">AI analysis has not been run on this report yet.</p>
+          </Card>
+        )}
+      </div>
+
+      {/* Actions Timeline - Full Width */}
+      <div className="w-full">
+        {actions.length > 0 && (
             <Card className="p-6">
               <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
                 <Wrench className="h-4 w-4 text-slate-400" /> Actions Taken
@@ -187,9 +235,14 @@ export function ReportDetailPage() {
                       {action.description && <p className="text-sm text-slate-600 mt-1">{action.description}</p>}
                       {action.after_image_urls && action.after_image_urls.length > 0 && (
                         <div className="flex gap-2 mt-2">
-                          {action.after_image_urls.map((url, i) => (
-                            <img key={i} src={url} alt="" className="w-20 h-20 rounded-lg object-cover" />
-                          ))}
+                          {action.after_image_urls.map((entry, i) => {
+                            const src = resolveImageSrc(entry);
+                            if (!src) return null;
+                            return (
+                              <img key={i} src={src} alt="" className="w-20 h-20 rounded-lg object-cover"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                            );
+                          })}
                         </div>
                       )}
                       <div className="flex gap-4 mt-2 text-xs text-slate-400">
@@ -203,38 +256,8 @@ export function ReportDetailPage() {
               </div>
             </Card>
           )}
-        </div>
-
-        {/* Right: Map + Meta */}
-        <div className="space-y-4">
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Location</h3>
-            <MapView reports={[report]} categories={categories} height="200px" centerLat={report.latitude} centerLng={report.longitude} zoom={15} />
-          </Card>
-
-          <Card className="p-4">
-            <h3 className="text-sm font-semibold text-slate-900 mb-3">Timeline</h3>
-            <div className="space-y-3">
-              <TimelineItem label="Submitted" date={report.submitted_at || report.created_at} active />
-              {report.assigned_at && <TimelineItem label="Assigned" date={report.assigned_at} active />}
-              {report.resolved_at && <TimelineItem label="Resolved" date={report.resolved_at} active />}
-              {report.status === 'in_progress' && <TimelineItem label="In Progress" date={report.updated_at} active />}
-            </div>
-          </Card>
-
-          {analysis && (
-            <Card className="p-4">
-              <h3 className="text-sm font-semibold text-slate-900 mb-3">AI Summary</h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between"><span className="text-slate-500">Problem</span><span className="font-medium text-slate-900 capitalize">{analysis.final_problem_type}</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Confidence</span><span className="font-medium text-slate-900">{Math.round((analysis.final_confidence || 0) * 100)}%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Authenticity</span><span className="font-medium text-slate-900">{Math.round((analysis.authenticity_score || 0) * 100)}%</span></div>
-                <div className="flex justify-between"><span className="text-slate-500">Related</span><span className="font-medium text-slate-900">{analysis.related_incident_count} incidents</span></div>
-              </div>
-            </Card>
-          )}
-        </div>
       </div>
+    </div>
 
       {/* Status Modal */}
       {showStatusModal && report && (

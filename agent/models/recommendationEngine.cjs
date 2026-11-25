@@ -208,6 +208,7 @@ class RecommendationEngine {
         "Blocked Drain",
         "waste clogged drain",
         "waste-clogged drain",
+        "blocked_drainage_system",
       ],
       flooding: [
         "Flooding",
@@ -215,6 +216,8 @@ class RecommendationEngine {
         "Water Accumulation",
         "Standing Water",
         "Flood Water",
+        "stormwater_capacity_exceeded",
+        "inadequate_slope_or_capacity",
       ],
       road_damage: [
         "Road Damage",
@@ -224,18 +227,25 @@ class RecommendationEngine {
         "Water Damage to Asphalt",
         "pothole",
         "Pothole Damage",
+        "foundation_failure",
+        "age_deterioration_or_construction_quality",
+        "poor_construction_quality",
+        "poor_repair_quality",  // Failed road repairs
       ],
       heavy_vehicle_traffic: [
         "Heavy Vehicle Traffic",
         "Excessive Heavy Vehicle Traffic",
         "Heavy Traffic Load",
         "Road Load",
+        "heavy_traffic_load",
       ],
       inadequate_waste_collection: [
         "Inadequate Waste Collection",
         "Waste Collection Failure",
         "Garbage Collection Failure",
         "Overflowing Waste",
+        "inadequate_collection_service",
+        "inadequate_waste_management",  // Waste management issues
       ],
       illegal_dumping: [
         "Illegal Dumping",
@@ -249,11 +259,16 @@ class RecommendationEngine {
         "Streetlight Failure",
         "Exposed Electrical Wiring",
         "Lighting Electrical Failure",
+        "equipment_failure",
+        "network_overload_or_fault",
       ],
       streetlight_structural_damage: [
         "Streetlight Structural Damage",
         "Damaged Streetlight Pole",
         "Leaning Streetlight Pole",
+        "physical_damage",
+        "physical_damage_or_age",
+        "storm_damage",  // Storm damage to infrastructure
       ],
       water_supply_leak: [
         "Water Leak",
@@ -262,6 +277,8 @@ class RecommendationEngine {
         "Water Pipe Leak",
         "water_leak",
         "Pipe Failure",
+        "connection_failure",
+        "water_infrastructure_damage",
       ],
     };
 
@@ -442,6 +459,82 @@ class RecommendationEngine {
               ["design_team"],
               ["Assess site", "Design", "Approve", "Implement"],
               "Recurring blockage reduced",
+            ),
+          ],
+        },
+        "flooding": {
+          // Stormwater capacity exceeded, slope issues
+          immediate: [
+            this.action(
+              "flood_manage_water",
+              "Manage Water Flow",
+              "Deploy temporary water management measures",
+              1,
+              "Drainage Department",
+              "4-12 hours",
+              "low",
+              ["pumping_equipment"],
+              ["Assess flooding", "Deploy pumps", "Monitor levels"],
+              "Water reaches safe level",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "flood_drain_repair",
+              "Address Drainage System Issues",
+              "Improve drainage system performance",
+              2,
+              "Drainage Department",
+              "3-7 days",
+              "medium",
+              ["drainage_crew"],
+              ["Inspect system", "Clear/repair", "Test flow"],
+              "System operates effectively",
+            ),
+          ],
+          long_term: [
+            this.action(
+              "flood_capacity_upgrade",
+              "Upgrade Drainage Capacity",
+              "Design and implement capacity improvements",
+              3,
+              "City Planning Department",
+              "6-12 months",
+              "very_high",
+              ["engineering_team", "contractors"],
+              ["Study capacity", "Design", "Approve", "Construct"],
+              "Flooding recurrence prevented",
+            ),
+          ],
+        },
+        "inadequate_waste_collection": {
+          // Waste management causing drain blockage  
+          immediate: [
+            this.action(
+              "flood_garbage_clean",
+              "Remove Waste From Drainage",
+              "Clear waste materials blocking drainage",
+              1,
+              "Sanitation Department",
+              "2-4 hours",
+              "low",
+              ["collection_equipment"],
+              ["Remove waste", "Clear drain", "Verify flow"],
+              "Drainage flows freely",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "flood_waste_prevention",
+              "Prevent Waste Accumulation",
+              "Implement waste management near drainage",
+              2,
+              "Sanitation Department",
+              "1-2 weeks",
+              "medium",
+              ["waste_bins", "signage"],
+              ["Install bins", "Post signs", "Schedule collection"],
+              "Waste managed before reaching drainage",
             ),
           ],
         },
@@ -677,6 +770,68 @@ class RecommendationEngine {
                 "Document root cause",
               ],
               "Structural recurrence is reduced",
+            ),
+          ],
+        },
+        "water_supply_leak": {
+          // Water infrastructure damage causing road damage
+          immediate: [
+            this.action(
+              "road_temp_safety",
+              "Install Temporary Safety Measures",
+              "Restrict access and protect the damaged area",
+              1,
+              "Roads Department",
+              "2-4 hours",
+              "low",
+              ["traffic_control"],
+              ["Mark hazard", "Limit access", "Inspect"],
+              "Vehicle and pedestrian risk reduced",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "road_repair",
+              "Repair Damaged Road Surface",
+              "Restore the damaged carriageway for safe use",
+              2,
+              "Roads Department",
+              "1-2 days",
+              "medium",
+              ["asphalt_paver", "compactor"],
+              ["Cut damaged section", "Prepare base", "Lay asphalt", "Compact"],
+              "Road is restored and safe",
+            ),
+          ],
+        },
+        "heavy_vehicle_traffic": {
+          // Heavy traffic load causing road damage
+          immediate: [
+            this.action(
+              "road_temp_safety",
+              "Install Temporary Safety Measures",
+              "Reduce immediate traffic risk",
+              1,
+              "Roads Department",
+              "2-4 hours",
+              "low",
+              ["traffic_control"],
+              ["Mark hazard", "Limit access", "Inspect damage"],
+              "Vehicle and pedestrian risk reduced",
+            ),
+          ],
+          short_term: [
+            this.action(
+              "road_repair",
+              "Repair Traffic-Damaged Road",
+              "Restore the damaged carriageway for safe heavy vehicle use",
+              2,
+              "Roads Department",
+              "1-2 days",
+              "medium",
+              ["asphalt_paver", "compactor"],
+              ["Assess damage extent", "Prepare reinforced base", "Lay asphalt", "Compact"],
+              "Road is restored and safe",
             ),
           ],
         },
@@ -917,7 +1072,60 @@ class RecommendationEngine {
     departmentStatus = {},
   ) {
     try {
-      const problemType = this.normalizeText(report?.category || "unknown");
+      // Normalize category for template matching
+      let problemType = this.normalizeText(report?.category || "unknown");
+      
+      // Get description and RCA cause for context-aware classification
+      const description = (report?.description || "").toLowerCase();
+      const rcaCause = (rootCauseAnalysis?.most_likely_cause?.cause || "").toLowerCase();
+      
+      // Context-aware sanitation classification
+      if (problemType === "sanitation issue") {
+        // Priority 1: Check for explicit waste/garbage keywords (stronger signal)
+        if (description.includes('garbage') || description.includes('trash') ||
+            description.includes('waste') || description.includes('collection') ||
+            description.includes('bin') || description.includes('truck') ||
+            description.includes('pickup')) {
+          problemType = "garbage";
+        }
+        // Priority 2: Check for facility keywords (should NOT map to drainage)
+        else if (description.includes('toilet') || description.includes('restroom') ||
+                 description.includes('bathroom') || description.includes('facility') ||
+                 description.includes('lavatory')) {
+          // Keep as sanitation_issue - no specific template, will use generic
+          problemType = "sanitation issue";
+        }
+        // Priority 3: Check for sewage/drainage keywords
+        else if (description.includes('sewage') || description.includes('sewer') || 
+                 description.includes('wastewater') || description.includes('manhole') ||
+                 (description.includes('drain') && description.includes('back'))) {
+          problemType = "flooding";
+        }
+        // Priority 4: RCA cause as fallback only if description unclear
+        else if (rcaCause.includes('waste') || rcaCause.includes('garbage') || 
+                 rcaCause.includes('collection')) {
+          problemType = "garbage";
+        }
+        else if (rcaCause.includes('drainage') || rcaCause.includes('sewer')) {
+          problemType = "flooding";
+        }
+        // Otherwise keep as sanitation_issue (will fall through to generic)
+      }
+      
+      // Category aliases for template matching
+      const categoryMap = {
+        "pothole": "road_damage",  // Potholes use road_damage templates
+        "streetlight outage": "streetlight",
+        "street light": "streetlight",
+        "power outage": "streetlight",
+        "blocked drain": "flooding",  // Drain issues use flooding templates
+        "drainage": "flooding",
+        "tree fall": "road_damage",  // Tree falls use road damage (obstruction) templates
+        "road damage": "road_damage"
+      };
+      
+      problemType = categoryMap[problemType] || problemType;
+      
       const rawRootCause =
         rootCauseAnalysis?.most_likely_cause?.cause || "Unknown";
       const canonicalRootCause = this.canonicalizeRootCause(rawRootCause);
